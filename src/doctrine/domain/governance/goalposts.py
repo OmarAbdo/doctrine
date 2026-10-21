@@ -64,6 +64,18 @@ def service_changes(before: Contract, after: Contract) -> list[str]:
     return changes
 
 
+def ai_task_changes(before: Contract, after: Contract) -> list[str]:
+    now = {task.name: task for task in after.ai_tasks}
+    changes = []
+    for task in before.ai_tasks:
+        current = now.get(task.name)
+        if current is None:
+            changes.append(f"ai task {task.name} removed")
+        elif current.minimum < task.minimum:
+            changes.append(f"ai task {task.name}: minimum {task.minimum:g} -> {current.minimum:g}")
+    return changes
+
+
 def contract_changes(before: Contract, after: Contract, table: RuleTable) -> list[str]:
     changes = []
     if after.doctrine_version != before.doctrine_version:
@@ -73,6 +85,7 @@ def contract_changes(before: Contract, after: Contract, table: RuleTable) -> lis
     changes += limit_changes(before, after, table)
     changes += exception_changes(before, after)
     changes += outcome_changes(before.outcome, after.outcome)
+    changes += ai_task_changes(before, after)
     return changes + service_changes(before, after)
 
 

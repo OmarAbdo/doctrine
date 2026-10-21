@@ -83,3 +83,13 @@ def test_new_eval_cases_are_free_but_changed_or_removed_labels_are_not() -> None
         "eval case a: label good -> bad",
         "eval case b removed",
     ]
+
+
+def test_lowering_or_dropping_an_ai_task_needs_approval() -> None:
+    task = {"name": "fit", "prompt": "p.md", "command": ["x"], "minimum": 0.9}
+    before = parse_contract(changed(ai_tasks=[task]))
+    lowered = parse_contract(changed(ai_tasks=[{**task, "minimum": 0.8}]))
+    raised = parse_contract(changed(ai_tasks=[{**task, "minimum": 0.95}]))
+    assert contract_changes(before, lowered, TABLE) == ["ai task fit: minimum 0.9 -> 0.8"]
+    assert contract_changes(before, raised, TABLE) == []
+    assert contract_changes(before, parse_contract(BASE), TABLE) == ["ai task fit removed"]

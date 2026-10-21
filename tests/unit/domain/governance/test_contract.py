@@ -62,3 +62,20 @@ def test_the_line_stops_when_the_metric_falls_under_its_stop_value() -> None:
     outcome = parse_contract(VALID).outcome
     assert outcome.line_stopped(7.9) is True
     assert outcome.line_stopped(8.0) is False
+
+
+def test_ai_tasks_name_their_prompt_command_eval_set_and_minimum() -> None:
+    task = {"name": "fit-score", "prompt": "prompts/fit-score.md",
+            "command": ["python", "-m", "jobs.adapters.fit_eval"], "minimum": 0.85}
+    contract = parse_contract(dict(VALID, ai_tasks=[task]))
+    parsed = contract.ai_tasks[0]
+    assert parsed.cases == "evals/fit-score/cases.jsonl"
+    assert parsed.results == "evals/fit-score/results.jsonl"
+    assert parsed.minimum == 0.85
+
+
+def test_an_ai_task_needs_a_minimum_between_zero_and_one() -> None:
+    task = {"name": "fit-score", "prompt": "p.md", "command": ["x"], "minimum": 1.5}
+    with pytest.raises(ContractError) as caught:
+        parse_contract(dict(VALID, ai_tasks=[task]))
+    assert "ai task fit-score: minimum must be between 0 and 1" in caught.value.problems
