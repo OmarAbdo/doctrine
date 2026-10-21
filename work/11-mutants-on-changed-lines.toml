@@ -1,0 +1,4 @@
+id = "11"
+title = "Mutants on changed lines"
+kind = "feature"
+scope = ["src/doctrine/domain/mutation/**", "src/doctrine/application/mutation.py"]
