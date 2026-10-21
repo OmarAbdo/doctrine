@@ -59,7 +59,15 @@ value, only `restore` items may change code until it recovers.
 
 ## Install
 
-As administrator, from this repository: `powershell -ExecutionPolicy Bypass -File policy\install.ps1`.
+Once, as administrator, from this repository:
+`powershell -ExecutionPolicy Bypass -File policy\install.ps1 -BotToken <token>`.
+
+After that doctrine keeps itself current. The "Doctrine update" task (SYSTEM, every 30 minutes and
+at startup) installs what was merged to the protected main, where every change needed the
+approver: into a new folder under `C:\Program Files\Doctrine\releases`, where its self-test must
+catch everything before the admin settings switch over. A running session keeps the release it
+started with. Failures go to `C:\Program Files\Doctrine\update.log` and leave the current release
+in place. Run the installer again only to change the bot token.
 
 ## Not built yet
 
