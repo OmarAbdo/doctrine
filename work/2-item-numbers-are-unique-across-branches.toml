@@ -1,0 +1,4 @@
+id = "2"
+title = "Item numbers are unique across branches"
+kind = "fix"
+scope = ["src/doctrine/adapters/cli/item_commands.py", "src/doctrine/adapters/tools/git_repository.py"]
