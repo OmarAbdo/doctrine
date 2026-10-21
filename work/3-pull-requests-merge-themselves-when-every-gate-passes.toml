@@ -1,0 +1,4 @@
+id = "3"
+title = "Pull requests merge themselves when every gate passes"
+kind = "chore"
+scope = [".github/workflows/merge.yml", "templates/python-hexagonal/.github/workflows/**", "README.md"]
