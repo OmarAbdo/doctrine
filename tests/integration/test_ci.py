@@ -92,3 +92,19 @@ def test_a_test_that_passes_without_the_change_proves_nothing(project: Path) -> 
     verdict = red_first.tests_fail_on_base(Project.load(project), GitRepository(project), "main")
     assert not verdict.ok
     assert "prove nothing" in verdict.message
+
+
+def test_an_approval_run_finds_the_item_from_the_pull_request_event(
+    project: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    item_branch(project)
+    write(project, "src/sample_jobs/domain/title.py", "SUFFIX = ' (m/w/d)'\n")
+    commit_all(project, "Inside the scope")
+    git(project, "switch", "-q", "--detach")
+    event = tmp_path / "review.json"
+    head = {"ref": "item/1-tidy-titles", "sha": "abc"}
+    event.write_text(
+        json.dumps({"pull_request": {"number": 7, "head": head, "base": {"ref": "main"}}})
+    )
+    monkeypatch.setenv("GITHUB_EVENT_PATH", str(event))
+    assert ci_commands.scope_command(project, "main") == 0

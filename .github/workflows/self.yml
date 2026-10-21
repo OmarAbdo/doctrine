@@ -38,7 +38,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          doctrine ci scope --base origin/${{ github.base_ref }}
-          doctrine ci red-first --base origin/${{ github.base_ref }}
-          doctrine ci coverage --base origin/${{ github.base_ref }}
-          doctrine ci goalposts --base origin/${{ github.base_ref }}
+          doctrine ci scope --base origin/${{ github.event.pull_request.base.ref }}
+          doctrine ci red-first --base origin/${{ github.event.pull_request.base.ref }}
+          doctrine ci coverage --base origin/${{ github.event.pull_request.base.ref }}
+          doctrine ci goalposts --base origin/${{ github.event.pull_request.base.ref }}

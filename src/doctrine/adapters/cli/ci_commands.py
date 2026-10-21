@@ -6,7 +6,7 @@ import tomllib
 from pathlib import Path
 
 from doctrine.adapters.cli.console import complain, load_project, say
-from doctrine.adapters.cli.github_reviews import owner_approved
+from doctrine.adapters.cli.github_reviews import owner_approved, pull_request_branch
 from doctrine.adapters.cli.red_first import tests_fail_on_base
 from doctrine.adapters.storage.project_files import CONTRACT_FILE, Project
 from doctrine.adapters.tools.git_repository import GitRepository
@@ -68,7 +68,7 @@ def goalposts_command(cwd: Path, base: str) -> int:
 
 
 def branch_item(project: Project, git: GitRepository) -> WorkItem | None:
-    branch = os.environ.get("GITHUB_HEAD_REF") or git.current_branch()
+    branch = pull_request_branch(os.environ) or git.current_branch()
     if not branch.startswith("item/"):
         return None
     return project.work_item(branch.removeprefix("item/").split("-", 1)[0])
