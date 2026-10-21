@@ -1,9 +1,54 @@
+import subprocess
+import sys
+import time
 from pathlib import Path
 
-from support.projects import commit_all, write
+import pytest
+from support.projects import commit_all, git, write
 
 from doctrine.adapters.tools.git_repository import GitRepository
 from doctrine.adapters.tools.subprocess_runner import SubprocessRunner
+
+DAEMON_COUNT = (
+    "@(Get-CimInstance Win32_Process -Filter \"name='git.exe'\" | "
+    "Where-Object { $_.CommandLine -match 'fsmonitor--daemon' }).Count"
+)
+
+
+def fsmonitor_daemons() -> int:
+    finished = subprocess.run(
+        ["powershell", "-NoProfile", "-Command", DAEMON_COUNT],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=True,
+    )
+    return int(finished.stdout.strip())
+
+
+@pytest.mark.skipif(
+    sys.platform != "win32", reason="the fsmonitor daemon is a Windows/macOS feature"
+)
+def test_doctrine_starts_no_fsmonitor_daemon_even_where_git_is_told_to(project: Path) -> None:
+    """2026-10-22: with core.fsmonitor on, every throwaway test repository left a daemon behind;
+    921 of them ran the PC out of memory."""
+    git(project, "config", "core.fsmonitor", "true")
+    before = fsmonitor_daemons()
+    try:
+        write(project, "notes.md", "changed\n")
+        GitRepository(project).git("status")
+        GitRepository(project).git("add", "-A")
+        commit_all(project, "A change")
+        time.sleep(2)
+        assert fsmonitor_daemons() == before
+    finally:
+        subprocess.run(
+            ["git", "fsmonitor--daemon", "stop"],
+            cwd=project,
+            capture_output=True,
+            timeout=60,
+            check=False,
+        )
 
 
 def test_git_reports_the_branch_the_changes_and_old_versions(project: Path) -> None:
