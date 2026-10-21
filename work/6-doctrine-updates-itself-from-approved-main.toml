@@ -1,0 +1,4 @@
+id = "6"
+title = "Doctrine updates itself from approved main"
+kind = "feature"
+scope = ["policy/**", "README.md"]
