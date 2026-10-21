@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from doctrine.domain.safety.protected import mentions_protected
 
 MAIN_BRANCHES = frozenset({"main", "master"})
+STREAM_REDIRECTION = re.compile(r"\d*>&\d|\d*>\s*(\$null|/dev/null|nul)\b", re.IGNORECASE)
 SEGMENTS = re.compile(r"&&|\|\||[;|\n]")
 PUSH = re.compile(r"\bgit\s+push\b[^;&|]*")
 TAGS_ONLY = re.compile(r"git\s+push\s+\S+\s+(--tags|refs/tags/\S+(\s+refs/tags/\S+)*)")
@@ -98,7 +99,9 @@ PROJECT_RULES = (
 
 
 def touches_protected_path(command: str) -> bool:
-    return mentions_protected(command) and WRITES.search(command) is not None
+    """A write near a protected path. Redirecting a stream (2>&1, >&2, 2>$null) writes no file."""
+    writes = STREAM_REDIRECTION.sub(" ", command)
+    return mentions_protected(command) and WRITES.search(writes) is not None
 
 
 def on_main(command: str, context: CommandContext) -> bool:

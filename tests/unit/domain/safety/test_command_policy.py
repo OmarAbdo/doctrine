@@ -94,3 +94,23 @@ def test_outside_a_project_main_is_open_but_the_other_rules_still_hold() -> None
     assert judge_command("git push origin main", OUTSIDE).allowed
     assert judge_command("git commit --no-verify -m x", OUTSIDE).rule == "skip-hooks"
     assert judge_command("gh auth token", OUTSIDE).rule == "credentials"
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        'cat "C:/Program Files/Doctrine/installed.json" 2>&1',
+        "Get-Content .doctrine/state.json 2>$null",
+        r"type .doctrine\evidence.jsonl >&2",
+    ],
+)
+def test_reading_a_protected_file_with_its_streams_redirected_is_allowed(command: str) -> None:
+    assert judge_command(command, ON_ITEM).allowed
+
+
+@pytest.mark.parametrize(
+    "command",
+    ["cat notes 2>&1 > .doctrine/state.json", "echo {} 1> .doctrine/state.json"],
+)
+def test_writing_a_protected_file_is_still_refused(command: str) -> None:
+    assert judge_command(command, ON_ITEM).rule == "protected-path"
