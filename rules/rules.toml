@@ -1,0 +1,36 @@
+# The universal rule table: the one source of truth for every language profile.
+#
+# A "max" limit may only go down and a "min" limit only up. A project may tighten any limit in its
+# doctrine.toml without approval; loosening one needs Omar's approval on the pull request.
+
+[limits]
+function_lines = { max = 40 }        # lines of one function or method, signature included
+complexity = { max = 8 }             # cyclomatic complexity of one function
+nesting = { max = 3 }                # nested blocks inside one function
+parameters = { max = 4 }             # parameters of one function, self and cls not counted
+file_lines = { max = 300 }           # lines of one source file
+modules_per_folder = { max = 10 }    # source files directly inside one folder
+name_length = { min = 3 }            # characters in a name, except the allowed short names below
+line_length = { max = 100 }          # characters in one line
+public_methods = { max = 7 }         # public methods of one class
+imports_per_module = { max = 12 }    # import statements of one module
+inheritance_depth = { max = 1 }      # bases of a class written in the project (composition first)
+interface_methods = { max = 5 }      # methods of one port or interface
+diff_coverage = { min = 85 }         # percent of changed lines a test runs
+mutation_score = { min = 70 }        # percent of mutants in changed code the tests kill
+item_lines = { max = 400 }           # lines a work item may add, net
+
+[bans]
+broad_catch = true                   # catching every exception
+suppression_comments = true          # comments that silence a linter or the type checker
+flag_arguments = true                # boolean parameters that switch a function's behaviour
+print_statements = true              # print instead of a logger or a return value
+missing_timeouts = true              # network calls without a timeout
+
+[names]
+allowed_short = ["i", "j", "_", "id", "db", "io", "ok", "ui", "os", "x", "y"]
+banned_words = [
+    "arr", "btn", "buf", "cb", "cfg", "cnt", "ctr", "dct", "elem", "err", "evt", "fn", "idx",
+    "lst", "mgr", "msg", "num", "obj", "pkt", "prm", "ptr", "req", "res", "ret", "str", "tmp",
+    "usr", "val", "var",
+]

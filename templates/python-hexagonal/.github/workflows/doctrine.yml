@@ -1,0 +1,11 @@
+# Doctrine's gates on every pull request. This file is guarded: changing it needs the approver.
+name: doctrine
+
+on:
+  pull_request:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  gates:
+    uses: {{doctrine_repository}}/.github/workflows/project-gates.yml@v{{version}}
