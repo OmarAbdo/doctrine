@@ -17,7 +17,12 @@ $home_dir = "C:\Program Files\Doctrine"
 $claude_dir = "C:\Program Files\ClaudeCode"
 $source = Split-Path -Parent $PSScriptRoot
 
-function Assert-Success([string]$step) {
+function Invoke-Native([string]$step, [scriptblock]$command) {
+    # Windows PowerShell 5.1 turns anything a program writes to stderr (pip's notices) into a
+    # terminating error under "Stop"; a program step fails only on its exit code.
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try { & $command 2>&1 | ForEach-Object { "$_" } } finally { $ErrorActionPreference = $previous }
     if ($LASTEXITCODE -ne 0) { throw "$step failed (exit code $LASTEXITCODE)" }
 }
 
@@ -73,11 +78,14 @@ foreach ($part in "src", "rules", "templates", "samples", "policy", "requirement
     Copy-Item -Recurse (Join-Path $source $part) "$home_dir\current\$part"
 }
 
-& $python -m venv "$home_dir\venv"; Assert-Success "Creating the virtual environment"
 $venv_python = "$home_dir\venv\Scripts\python.exe"
-& $venv_python -m pip install --quiet --require-hashes -r "$home_dir\current\requirements\tools.txt"; Assert-Success "Installing the pinned tools"
-& $venv_python -m pip install --quiet --no-deps -e "$home_dir\current"; Assert-Success "Installing doctrine"
-& $venv_python -I -m doctrine selftest; Assert-Success "Doctrine's self-test"
+$pip = "--disable-pip-version-check", "--no-input", "--quiet"
+Invoke-Native "Creating the virtual environment" { & $python -m venv "$home_dir\venv" }
+Invoke-Native "Installing the pinned tools" {
+    & $venv_python -m pip install @pip --require-hashes -r "$home_dir\current\requirements\tools.txt"
+}
+Invoke-Native "Installing doctrine" { & $venv_python -m pip install @pip --no-deps -e "$home_dir\current" }
+Invoke-Native "Doctrine's self-test" { & $venv_python -I -m doctrine selftest }
 
 New-Item -ItemType Directory -Force $claude_dir | Out-Null
 $settings = Join-Path $claude_dir "managed-settings.json"
