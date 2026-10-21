@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from support.projects import write
+from support.projects import git, write
 
 from doctrine.adapters.cli import check_commands, item_commands
 from doctrine.adapters.cli.console import NoProjectError, load_project
@@ -61,3 +61,13 @@ def test_the_outcome_metric_is_recorded_from_its_command(
     monkeypatch.chdir(project)
     assert main(["metric", "record"]) == 0
     assert latest_metric(project) == 3.0
+
+
+def test_item_numbers_count_the_items_on_other_branches(
+    project: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    git(project, "branch", "item/4-started-elsewhere")
+    monkeypatch.chdir(project)
+    scope = "src/sample_jobs/domain/**"
+    assert main(["item", "start", "--kind", "chore", "--title", "Next", "--scope", scope]) == 0
+    assert GitRepository(project).current_branch() == "item/5-next"

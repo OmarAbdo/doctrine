@@ -6,6 +6,7 @@ from pathlib import Path
 
 from doctrine.adapters.cli.console import complain, load_project, say
 from doctrine.adapters.storage.metric_log import append_metric
+from doctrine.adapters.storage.project_files import Project
 from doctrine.adapters.storage.evidence_log import EvidenceLog
 from doctrine.adapters.storage.state_store import StateStore, now
 from doctrine.adapters.tools.git_repository import GitRepository
@@ -23,6 +24,12 @@ def item_toml(item: WorkItem) -> str:
     )
 
 
+def next_item_id(project: Project) -> str:
+    """One more than any item in work/ or on any branch, so parallel items never share a number."""
+    on_branches = GitRepository(project.root).highest_item_number()
+    return str(max(int(project.next_item_id()), on_branches + 1))
+
+
 def item_start(cwd: Path, kind: str, title: str, scope: list[str]) -> int:
     project = load_project(cwd)
     state = StateStore(project.root)
@@ -32,7 +39,7 @@ def item_start(cwd: Path, kind: str, title: str, scope: list[str]) -> int:
         )
         return 1
     item = parse_work_item(
-        {"id": project.next_item_id(), "title": title, "kind": kind, "scope": scope}
+        {"id": next_item_id(project), "title": title, "kind": kind, "scope": scope}
     )
     (project.root / "work").mkdir(exist_ok=True)
     (project.root / "work" / f"{item.id}-{item.slug}.toml").write_text(
