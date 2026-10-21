@@ -66,3 +66,5 @@ path = "metrics/outcome.jsonl"
 path = "C:/Program Files/Doctrine/rules/rules.toml"
 [[edit]]
 path = "src/project/domain/outside_scope.py"
+[[shell]]
+command = "git push origin refs/tags/v9.9.9 main"

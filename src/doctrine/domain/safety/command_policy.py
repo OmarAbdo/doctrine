@@ -10,6 +10,9 @@ from dataclasses import dataclass
 from doctrine.domain.safety.protected import mentions_protected
 
 MAIN_BRANCHES = frozenset({"main", "master"})
+SEGMENTS = re.compile(r"&&|\|\||[;|\n]")
+PUSH = re.compile(r"\bgit\s+push\b[^;&|]*")
+TAGS_ONLY = re.compile(r"git\s+push\s+\S+\s+(--tags|refs/tags/\S+(\s+refs/tags/\S+)*)")
 
 WRITES = re.compile(
     r"(>|\btee\b|\bsed\s+-i|\bperl\s+-i|\bset-content\b|\badd-content\b|\bout-file\b|\bnew-item\b|"
@@ -99,11 +102,22 @@ def touches_protected_path(command: str) -> bool:
 
 
 def on_main(command: str, context: CommandContext) -> bool:
-    commits_or_pushes = re.search(r"\bgit\s+(commit|push)\b", command) is not None
-    return commits_or_pushes and context.current_branch in MAIN_BRANCHES
+    """A commit on main, or a push from main that sends more than tags (a tag never moves main)."""
+    if context.current_branch not in MAIN_BRANCHES:
+        return False
+    if re.search(r"\bgit\s+commit\b", command):
+        return True
+    pushes = (push.strip() for push in PUSH.findall(command))
+    return any(not TAGS_ONLY.fullmatch(push) for push in pushes)
 
 
 def judge_command(command: str, context: CommandContext) -> Verdict:
+    """Each command of a line on its own (`a; b`, `a && b`, `a | b`): the first refusal wins."""
+    verdicts = (judge_segment(segment, context) for segment in SEGMENTS.split(command))
+    return next((verdict for verdict in verdicts if not verdict.allowed), ALLOWED)
+
+
+def judge_segment(command: str, context: CommandContext) -> Verdict:
     """The rules that hold everywhere, then, inside a doctrine project, those protecting main."""
     rules = (*RULES, *PROJECT_RULES) if context.in_project else RULES
     for rule, pattern, advice in rules:
