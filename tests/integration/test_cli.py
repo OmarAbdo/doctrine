@@ -71,3 +71,30 @@ def test_item_numbers_count_the_items_on_other_branches(
     scope = "src/sample_jobs/domain/**"
     assert main(["item", "start", "--kind", "chore", "--title", "Next", "--scope", scope]) == 0
     assert GitRepository(project).current_branch() == "item/5-next"
+
+
+def test_item_show_and_done_explain_what_is_missing(
+    project: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(project)
+    assert main(["item", "show"]) == 0
+    assert main(["item", "done"]) == 1
+    scope = "src/sample_jobs/domain/**"
+    assert main(["item", "start", "--kind", "chore", "--title", "Tidy", "--scope", scope]) == 0
+    assert main(["item", "show"]) == 0
+    StateStore(project).update(unchecked=True)
+    assert main(["item", "done"]) == 1
+
+
+def test_a_failing_metric_command_records_nothing(
+    project: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    contract = project / "doctrine.toml"
+    old_command = 'command = ["python", "-m", "sample_jobs.adapters.outcome"]'
+    failing = 'command = ["python", "-c", "raise SystemExit(2)"]'
+    contract.write_text(
+        contract.read_text(encoding="utf-8").replace(old_command, failing), encoding="utf-8"
+    )
+    monkeypatch.chdir(project)
+    assert main(["metric", "record"]) == 1
+    assert latest_metric(project) is None
