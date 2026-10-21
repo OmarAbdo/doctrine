@@ -16,9 +16,19 @@ def file_problems(project: Project, path: Path) -> list[str]:
     runner.run("ruff-format", ["format", "--no-cache", line_length, str(path)])
     result = runner.run("ruff", ruff_check(project.rules, [str(path)]).arguments)
     problems = [] if result.passed else [result.output]
+    if not is_service_source(project, path):
+        return problems
     source = path.read_text(encoding="utf-8")
     findings = module_findings(path.name, source, source_limits(project.rules))
     return problems + [str(finding) for finding in findings]
+
+
+def is_service_source(project: Project, path: Path) -> bool:
+    """Doctrine's own source rules apply where `doctrine check` applies them: service code."""
+    relative = path.resolve().relative_to(project.root.resolve()).as_posix()
+    return any(
+        relative.startswith(service.path.rstrip("/") + "/") for service in project.contract.services
+    )
 
 
 def review_edit(path: Path) -> list[str]:
