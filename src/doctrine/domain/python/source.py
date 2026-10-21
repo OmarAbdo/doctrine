@@ -28,17 +28,22 @@ class SourceLimits:
     names: NamePolicy
 
 
-def function_findings(path: str, tree: ast.Module, limit: int) -> Iterator[Finding]:
-    for node in ast.walk(tree):
-        if isinstance(node, FUNCTIONS):
-            length = (node.end_lineno or node.lineno) - node.lineno + 1
-            if length > limit:
-                yield Finding(
-                    path,
-                    node.lineno,
-                    "function_lines",
-                    f"{node.name} has {length} lines; the limit is {limit}",
-                )
+def function_length(node: ast.FunctionDef | ast.AsyncFunctionDef) -> int:
+    return (node.end_lineno or node.lineno) - node.lineno + 1
+
+
+def function_findings(path: str, tree: ast.Module, limit: int) -> list[Finding]:
+    functions = [node for node in ast.walk(tree) if isinstance(node, FUNCTIONS)]
+    return [
+        Finding(
+            path,
+            node.lineno,
+            "function_lines",
+            f"{node.name} has {function_length(node)} lines; the limit is {limit}",
+        )
+        for node in functions
+        if function_length(node) > limit
+    ]
 
 
 def named_nodes(tree: ast.Module) -> Iterator[tuple[str, int]]:
@@ -84,17 +89,29 @@ def base_names(node: ast.ClassDef) -> list[str]:
     return [base.id if isinstance(base, ast.Name) else ast.unparse(base) for base in node.bases]
 
 
-def interface_findings(path: str, tree: ast.Module, limit: int) -> Iterator[Finding]:
-    for node in ast.walk(tree):
-        if isinstance(node, ast.ClassDef) and INTERFACE_BASES & set(base_names(node)):
-            methods = [item for item in node.body if isinstance(item, FUNCTIONS)]
-            if len(methods) > limit:
-                yield Finding(
-                    path,
-                    node.lineno,
-                    "interface_methods",
-                    f"{node.name} has {len(methods)} methods; the limit is {limit}",
-                )
+def classes(tree: ast.Module) -> list[ast.ClassDef]:
+    return [node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
+
+
+def is_interface(node: ast.ClassDef) -> bool:
+    return bool(INTERFACE_BASES & set(base_names(node)))
+
+
+def method_count(node: ast.ClassDef) -> int:
+    return sum(isinstance(item, FUNCTIONS) for item in node.body)
+
+
+def interface_findings(path: str, tree: ast.Module, limit: int) -> list[Finding]:
+    return [
+        Finding(
+            path,
+            node.lineno,
+            "interface_methods",
+            f"{node.name} has {method_count(node)} methods; the limit is {limit}",
+        )
+        for node in classes(tree)
+        if is_interface(node) and method_count(node) > limit
+    ]
 
 
 def module_findings(path: str, source: str, limits: SourceLimits) -> list[Finding]:
@@ -109,12 +126,12 @@ def module_findings(path: str, source: str, limits: SourceLimits) -> list[Findin
 
 
 def concrete_classes(sources: Mapping[str, str]) -> set[str]:
-    found = set()
-    for source in sources.values():
-        for node in ast.walk(ast.parse(source)):
-            if isinstance(node, ast.ClassDef) and not INTERFACE_BASES & set(base_names(node)):
-                found.add(node.name)
-    return found
+    return {
+        node.name
+        for source in sources.values()
+        for node in classes(ast.parse(source))
+        if not is_interface(node)
+    }
 
 
 def composition_findings(sources: Mapping[str, str]) -> list[Finding]:

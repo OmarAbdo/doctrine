@@ -84,19 +84,28 @@ def imports_of(source: str) -> set[str]:
     return found
 
 
-def unit_tests_on_adapters(package: str, tests: Mapping[str, str]) -> Iterator[Finding]:
-    adapters = f"{package}.adapters"
-    for path, source in tests.items():
-        if not path.startswith("tests/unit/"):
-            continue
-        for module in sorted(imports_of(source)):
-            if module.startswith(adapters + ".") and module.count(".") == adapters.count(".") + 1:
-                yield Finding(
-                    path,
-                    1,
-                    "test_kinds",
-                    f"{path}: a unit test may not import {module} (use tests/integration)",
-                )
+def adapter_modules(source: str, adapters: str) -> list[str]:
+    """The adapter modules a test imports by name (pkg.adapters.mail, not pkg.adapters)."""
+    depth = adapters.count(".") + 1
+    return [
+        module
+        for module in sorted(imports_of(source))
+        if module.startswith(adapters + ".") and module.count(".") == depth
+    ]
+
+
+def unit_tests_on_adapters(package: str, tests: Mapping[str, str]) -> list[Finding]:
+    unit_tests = {path: source for path, source in tests.items() if path.startswith("tests/unit/")}
+    return [
+        Finding(
+            path,
+            1,
+            "test_kinds",
+            f"{path}: a unit test may not import {module} (use tests/integration)",
+        )
+        for path, source in unit_tests.items()
+        for module in adapter_modules(source, f"{package}.adapters")
+    ]
 
 
 def untested_modules(modules: Sequence[str], tests: Mapping[str, str]) -> Iterator[Finding]:

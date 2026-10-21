@@ -5,8 +5,8 @@
 
 [limits]
 function_lines = { max = 40 }        # lines of one function or method, signature included
-complexity = { max = 8 }             # cyclomatic complexity of one function
-nesting = { max = 3 }                # nested blocks inside one function
+complexity = { max = 7 }             # cyclomatic complexity of one function
+nesting = { max = 2 }                # nested blocks inside one function
 parameters = { max = 4 }             # parameters of one function, self and cls not counted
 file_lines = { max = 300 }           # lines of one source file
 modules_per_folder = { max = 10 }    # source files directly inside one folder
