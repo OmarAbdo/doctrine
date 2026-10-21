@@ -39,6 +39,10 @@ doctrine item done       # only with a red run, a passing check, nothing uncheck
 git push -u origin item/1-search-by-city && gh pr create --fill
 ```
 
+Claude never merges. The pull request merges itself (`merge.yml`) once every gate passed on its
+latest commit, and, where the goalposts moved or the branch protection asks for it, once the
+approver approved that commit.
+
 `doctrine metric record` runs the project's outcome command. When the value falls under its stop
 value, only `restore` items may change code until it recovers.
 
@@ -59,5 +63,4 @@ As administrator, from this repository: `powershell -ExecutionPolicy Bypass -Fil
 
 ## Not built yet
 
-The TypeScript profile, mutation testing, the eval kit (traces, labels, judge alignment) and the
-merge workflow for the bot's pull requests.
+The TypeScript profile, mutation testing and the eval kit (traces, labels, judge alignment).
