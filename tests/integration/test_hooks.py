@@ -96,3 +96,16 @@ def test_the_last_assistant_message_is_read_from_the_transcript(tmp_path: Path) 
 def test_outside_a_project_the_situation_has_no_root(tmp_path: Path) -> None:
     assert situation.situation_for(tmp_path).root is None
     assert situation.status_for(tmp_path) is None
+
+
+def test_an_honest_turn_end_resets_the_refusal_count(
+    project: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    StateStore(project).update(unchecked=True, stop_blocks=2)
+    event = {
+        "cwd": str(project),
+        "last_assistant_message": "The check failed; nothing is verified.",
+    }
+    code, out, _ = hook("stop", event, monkeypatch, capsys)
+    assert (code, out) == (0, "")
+    assert StateStore(project).load()["stop_blocks"] == 0

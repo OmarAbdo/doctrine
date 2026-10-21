@@ -27,9 +27,12 @@ def stop_refusal(event: dict[str, Any]) -> str | None:
     cwd = Path(event.get("cwd") or ".")
     decision = decide_stop(final_message(event), situation_for(cwd))
     root = find_root(cwd)
-    if decision.allowed or root is None:
+    if root is None:
         return None
     state = StateStore(root)
+    if decision.allowed:
+        state.update(stop_blocks=0)
+        return None
     blocks = int(str(state.load().get("stop_blocks", 0))) + 1
     if event.get("stop_hook_active") and blocks > STOP_BLOCK_LIMIT:
         state.update(stop_blocks=0)

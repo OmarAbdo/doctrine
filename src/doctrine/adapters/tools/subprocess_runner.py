@@ -14,6 +14,8 @@ MODULES = {
     "pylint": "pylint",
     "mypy": "mypy",
     "pytest": "pytest",
+    "coverage": "coverage",
+    "diff-cover": "diff_cover.diff_cover_tool",
 }
 TIMEOUT_SECONDS = 900
 
