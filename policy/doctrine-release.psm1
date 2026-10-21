@@ -55,6 +55,11 @@ function Select-PrunableReleases([string[]]$Releases, [string]$Current, [int]$Ke
     return @($old | Where-Object { $_ -ne $Current })
 }
 
+function Get-ReleaseName([string]$Commit) {
+    # Short, because pip's deepest files must stay under Windows' 260-character path limit.
+    return $Commit.Substring(0, [Math]::Min(12, $Commit.Length))
+}
+
 function Test-SelftestPassed([string]$Output) {
     $lines = @($Output -split "`r?`n" | Where-Object { $_.Trim() })
     return ($lines.Count -gt 0 -and $lines[-1].Trim() -eq "1")
@@ -81,12 +86,12 @@ function Write-Atomically([string]$Path, [string]$Text) {
 }
 
 function Install-Release {
-    # Builds the release from $Source under $HomeDir\releases\$Commit, proves it with its
+    # Builds the release from $Source under $HomeDir\releases\<short commit>, proves it with its
     # self-test and makes it current. Throws, leaving the current release untouched, when any
     # step fails.
     param([string]$Source, [string]$Commit, [string]$Python, [string]$HomeDir, [string]$ClaudeDir,
           [string]$Token = "")
-    $release = Join-Path $HomeDir "releases\$Commit"
+    $release = Join-Path $HomeDir ("releases\" + (Get-ReleaseName $Commit))
     if (Test-Path $release) { Remove-Item -Recurse -Force $release }
     New-Item -ItemType Directory -Force "$release\source" | Out-Null
     foreach ($part in "src", "rules", "templates", "samples", "policy", "requirements", "pyproject.toml") {
@@ -120,15 +125,16 @@ function Set-CurrentRelease {
     $template = Get-Content -Raw "$Release\source\policy\managed-settings.template.json"
     if (-not $Token) { $Token = Get-StoredToken $settings }
     $text = New-SettingsText -Template $template -Python $venvPython -Token $Token
-    Write-Atomically $settings $text
+    # Everything that can fail comes first; the admin settings switch sessions over last.
+    Copy-Item "$Release\source\policy\update.ps1", "$Release\source\policy\doctrine-release.psm1" $HomeDir -Force
     Copy-Item "$Release\source\policy\CLAUDE.md" (Join-Path $ClaudeDir "CLAUDE.md") -Force
     New-Item -ItemType Directory -Force "$HomeDir\bin" | Out-Null
     Write-Atomically "$HomeDir\bin\doctrine.cmd" (Get-ShimText $venvPython)
-    Copy-Item "$Release\source\policy\update.ps1", "$Release\source\policy\doctrine-release.psm1" $HomeDir -Force
+    Write-Atomically $settings $text
     $at = (Get-Date).ToUniversalTime().ToString("s") + "Z"
     $installed = [ordered]@{ commit = $Commit; release = $Release; python = $Python; at = $at }
     Write-Atomically "$HomeDir\installed.json" ($installed | ConvertTo-Json)
-    Remove-OldReleases -HomeDir $HomeDir -Current $Commit
+    Remove-OldReleases -HomeDir $HomeDir -Current (Get-ReleaseName $Commit)
 }
 
 function Remove-OldReleases([string]$HomeDir, [string]$Current) {
