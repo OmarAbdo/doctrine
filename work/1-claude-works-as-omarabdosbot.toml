@@ -1,0 +1,4 @@
+id = "1"
+title = "Claude works as OmarAbdosBot"
+kind = "chore"
+scope = ["policy/**"]

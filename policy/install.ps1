@@ -9,7 +9,13 @@
 #   3. C:\Program Files\ClaudeCode\managed-settings.json: doctrine's hooks, which no user or
 #      project setting can switch off, and C:\Program Files\ClaudeCode\CLAUDE.md.
 #   4. C:\Program Files\Doctrine\venv\Scripts on the machine PATH, so `doctrine` works everywhere.
+#   5. With -BotToken (or the token a previous install stored): every Claude Code session works on
+#      GitHub as OmarAbdosBot, which can't approve its own pull requests or change protection.
+param([string]$BotToken = "")
 $ErrorActionPreference = "Stop"
+
+$bot_login = "OmarAbdosBot"
+$bot_email = "345973053+OmarAbdosBot@users.noreply.github.com"
 
 $installer_version = "3.13.17"
 $installer_sha256 = "5da012101ba2e17113a9a1cd901e9ce1441086f2b7ecb5de06ec94163899a190"
@@ -63,6 +69,28 @@ function Install-Python {
     return "$target\python.exe"
 }
 
+function Get-BotEnvironment([string]$token) {
+    # Claude's gh and git act as the bot: GH_TOKEN for gh, gh as git's only GitHub credential
+    # helper, and the bot as author and committer. Omar's own terminals keep his account.
+    if (-not $token) { return "{}" }
+    $environment = [ordered]@{
+        GH_TOKEN = $token
+        GIT_AUTHOR_NAME = $bot_login; GIT_AUTHOR_EMAIL = $bot_email
+        GIT_COMMITTER_NAME = $bot_login; GIT_COMMITTER_EMAIL = $bot_email
+        GIT_CONFIG_COUNT = "2"
+        GIT_CONFIG_KEY_0 = "credential.https://github.com.helper"; GIT_CONFIG_VALUE_0 = ""
+        GIT_CONFIG_KEY_1 = "credential.https://github.com.helper"; GIT_CONFIG_VALUE_1 = "!gh auth git-credential"
+    }
+    return ($environment | ConvertTo-Json -Compress)
+}
+
+function Get-StoredToken([string]$settings) {
+    if (-not (Test-Path $settings)) { return "" }
+    $stored = (Get-Content -Raw $settings | ConvertFrom-Json).env
+    if ($stored -and $stored.GH_TOKEN) { return $stored.GH_TOKEN }
+    return ""
+}
+
 $principal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     throw "Run this script as administrator."
@@ -89,9 +117,16 @@ Invoke-Native "Doctrine's self-test" { & $venv_python -I -m doctrine selftest }
 
 New-Item -ItemType Directory -Force $claude_dir | Out-Null
 $settings = Join-Path $claude_dir "managed-settings.json"
-if (Test-Path $settings) { Copy-Item $settings "$settings.before-doctrine" -Force }
+if ((Test-Path $settings) -and -not (Test-Path "$settings.before-doctrine")) {
+    Copy-Item $settings "$settings.before-doctrine"
+}
+if (-not $BotToken) { $BotToken = Get-StoredToken $settings }
 $template = Get-Content -Raw "$home_dir\current\policy\managed-settings.template.json"
-[IO.File]::WriteAllText($settings, $template.Replace("{{python}}", $venv_python.Replace("\", "/")))
+$filled = $template.Replace("{{python}}", $venv_python.Replace("\", "/"))
+$filled = $filled.Replace('"env": {}', '"env": ' + (Get-BotEnvironment $BotToken))
+$null = $filled | ConvertFrom-Json
+[IO.File]::WriteAllText($settings, $filled)
+Write-Output ("GitHub identity for Claude: " + $(if ($BotToken) { $bot_login } else { "Omar's own (no bot token)" }))
 Copy-Item "$home_dir\current\policy\CLAUDE.md" (Join-Path $claude_dir "CLAUDE.md") -Force
 
 $path = [Environment]::GetEnvironmentVariable("Path", "Machine")

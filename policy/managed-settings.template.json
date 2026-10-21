@@ -1,5 +1,6 @@
 {
   "allowManagedHooksOnly": true,
+  "env": {},
   "hooks": {
     "SessionStart": [
       {"hooks": [{"type": "command", "command": "\"{{python}}\" -I -m doctrine hook session-start", "timeout": 30}]}
