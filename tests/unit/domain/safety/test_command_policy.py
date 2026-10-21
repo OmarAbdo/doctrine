@@ -62,6 +62,25 @@ def test_ordinary_work_is_allowed(command: str) -> None:
 def test_committing_or_pushing_on_main_is_refused() -> None:
     assert judge_command("git commit -m 'quick fix'", ON_MAIN).rule == "main-branch"
     assert judge_command("git push", ON_MAIN).rule == "main-branch"
+    assert judge_command("git push origin HEAD", ON_MAIN).rule == "main-branch"
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git push origin refs/tags/v0.1.0",
+        "git push origin --tags",
+        "git pull && git push origin refs/tags/v1.2.3",
+    ],
+)
+def test_pushing_only_tags_from_main_is_allowed(command: str) -> None:
+    assert judge_command(command, ON_MAIN).allowed
+
+
+def test_each_command_in_a_line_is_judged_on_its_own() -> None:
+    line = "git push -u origin item/5-tags 2>&1 | tail -1; gh pr create --fill --base main"
+    assert judge_command(line, ON_ITEM).allowed
+    assert not judge_command("git status && git push origin main", ON_ITEM).allowed
 
 
 def test_a_refusal_says_why_and_what_to_do_instead() -> None:
