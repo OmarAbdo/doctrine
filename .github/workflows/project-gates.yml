@@ -43,12 +43,12 @@ jobs:
       - name: Every rule on every service
         run: doctrine check
       - name: The item's scope and size
-        run: doctrine ci scope --base origin/${{ github.base_ref }}
+        run: doctrine ci scope --base origin/${{ github.event.pull_request.base.ref }}
       - name: New tests fail on the code before the item
-        run: doctrine ci red-first --base origin/${{ github.base_ref }}
+        run: doctrine ci red-first --base origin/${{ github.event.pull_request.base.ref }}
       - name: Changed lines are tested
-        run: doctrine ci coverage --base origin/${{ github.base_ref }}
+        run: doctrine ci coverage --base origin/${{ github.event.pull_request.base.ref }}
       - name: Goalposts unchanged, or approved by the approver
         env:
           GH_TOKEN: ${{ github.token }}
-        run: doctrine ci goalposts --base origin/${{ github.base_ref }}
+        run: doctrine ci goalposts --base origin/${{ github.event.pull_request.base.ref }}

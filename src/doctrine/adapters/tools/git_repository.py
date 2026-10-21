@@ -1,10 +1,12 @@
 """The git facts doctrine needs: the branch, changed files and files at another commit."""
 
+import re
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
 TIMEOUT_SECONDS = 60
+ITEM_BRANCH = re.compile(r"(?:^|/)item/(\d+)-")
 
 
 class GitError(RuntimeError):
@@ -54,6 +56,12 @@ class GitRepository:
             return self.git("show", f"{revision}:{path}")
         except GitError:
             return None
+
+    def highest_item_number(self) -> int:
+        """The highest number among item branches, local or remote (item/<n>-<title>)."""
+        branches = self.git("branch", "--all", "--format=%(refname:short)").splitlines()
+        numbers = [int(match.group(1)) for match in map(ITEM_BRANCH.search, branches) if match]
+        return max(numbers, default=0)
 
     def create_branch(self, name: str) -> None:
         self.git("switch", "-c", name)

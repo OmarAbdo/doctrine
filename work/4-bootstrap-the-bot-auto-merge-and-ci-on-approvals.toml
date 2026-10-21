@@ -1,0 +1,4 @@
+id = "4"
+title = "Bootstrap the bot, auto-merge and CI on approvals"
+kind = "fix"
+scope = ["policy/**", "src/doctrine/adapters/**", ".github/workflows/**", "templates/**", "README.md"]

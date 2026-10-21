@@ -92,3 +92,66 @@ def test_a_test_that_passes_without_the_change_proves_nothing(project: Path) -> 
     verdict = red_first.tests_fail_on_base(Project.load(project), GitRepository(project), "main")
     assert not verdict.ok
     assert "prove nothing" in verdict.message
+
+
+def test_an_approval_run_finds_the_item_from_the_pull_request_event(
+    project: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    item_branch(project)
+    write(project, "src/sample_jobs/domain/title.py", "SUFFIX = ' (m/w/d)'\n")
+    commit_all(project, "Inside the scope")
+    git(project, "switch", "-q", "--detach")
+    event = tmp_path / "review.json"
+    head = {"ref": "item/1-tidy-titles", "sha": "abc"}
+    event.write_text(
+        json.dumps({"pull_request": {"number": 7, "head": head, "base": {"ref": "main"}}})
+    )
+    monkeypatch.setenv("GITHUB_EVENT_PATH", str(event))
+    assert ci_commands.scope_command(project, "main") == 0
+
+
+def test_a_changed_eval_label_needs_the_approver(project: Path) -> None:
+    write(project, "evals/titles/cases.jsonl", '{"id": "a", "label": "good"}\n')
+    commit_all(project, "First eval case")
+    item_branch(project)
+    write(
+        project,
+        "evals/titles/cases.jsonl",
+        '{"id": "a", "label": "bad"}\n{"id": "b", "label": "good"}\n',
+    )
+    commit_all(project, "Relabel")
+    changes = ci_commands.goalpost_changes(Project.load(project), "main")
+    assert changes == ["evals/titles/cases.jsonl: eval case a: label good -> bad"]
+
+
+def test_an_approved_change_passes_the_goalposts(
+    project: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    item_branch(project)
+    write(project, ".github/workflows/extra.yml", "name: extra\n")
+    commit_all(project, "A guarded file")
+    monkeypatch.setattr(ci_commands, "owner_approved", lambda environment, approver: True)
+    assert ci_commands.goalposts_command(project, "main") == 0
+
+
+def test_the_gates_refuse_a_branch_that_is_no_item_and_an_item_over_budget(project: Path) -> None:
+    assert ci_commands.scope_command(project, "main") == 1
+    item_branch(project)
+    write(
+        project,
+        "src/sample_jobs/domain/big.py",
+        "".join(f"VALUE_{number} = {number}\n" for number in range(401)),
+    )
+    commit_all(project, "Too big")
+    assert ci_commands.scope_command(project, "main") == 1
+
+
+def test_a_chore_needs_no_failing_test(project: Path) -> None:
+    git(project, "switch", "-q", "-c", "item/2-tidy-readme")
+    write(
+        project,
+        "work/2-tidy-readme.toml",
+        'id = "2"\ntitle = "Tidy readme"\nkind = "chore"\nscope = ["README.md"]\n',
+    )
+    commit_all(project, "Chore")
+    assert ci_commands.red_first_command(project, "main") == 0
