@@ -1,0 +1,4 @@
+id = "36"
+title = "Every text file is stored with LF line endings"
+kind = "chore"
+scope = [".gitattributes", ".github/**", "README.md", "doctrine.toml", "metrics/**", "policy/**", "pyproject.toml", "rules/**", "src/**", "templates/**", "tests/**", "work/**"]
