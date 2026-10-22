@@ -111,17 +111,18 @@ def test_an_approval_run_finds_the_item_from_the_pull_request_event(
 
 
 def test_a_changed_eval_label_needs_the_approver(project: Path) -> None:
-    write(project, "evals/titles/cases.jsonl", '{"id": "a", "label": "good"}\n')
+    write(project, "evals/titles/cases.jsonl", '{"id": "a", "input": "x", "expected": "good"}\n')
     commit_all(project, "First eval case")
     item_branch(project)
     write(
         project,
         "evals/titles/cases.jsonl",
-        '{"id": "a", "label": "bad"}\n{"id": "b", "label": "good"}\n',
+        '{"id": "a", "input": "x", "expected": "bad"}\n'
+        '{"id": "b", "input": "y", "expected": "good"}\n',
     )
     commit_all(project, "Relabel")
     changes = ci_commands.goalpost_changes(Project.load(project), "main")
-    assert changes == ["evals/titles/cases.jsonl: eval case a: label good -> bad"]
+    assert changes == ["evals/titles/cases.jsonl: eval case a: expected good -> bad"]
 
 
 def test_an_approved_change_passes_the_goalposts(

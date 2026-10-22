@@ -5,7 +5,9 @@ approves the pull request.
 """
 
 from collections.abc import Mapping, Sequence
+from typing import Any
 
+from doctrine.domain.evals.cases import expected_answers
 from doctrine.domain.governance.contract import Contract, Outcome
 from doctrine.domain.rules.table import RuleTable
 
@@ -91,14 +93,23 @@ def contract_changes(before: Contract, after: Contract, table: RuleTable) -> lis
     return changes + service_changes(before, after)
 
 
+def eval_labels(rows: Sequence[Mapping[str, Any]]) -> dict[str, str]:
+    """An eval set's expected answers by case id. Recorded runs have no id and are no labels."""
+    return {
+        str(row["id"]): " | ".join(expected_answers(row.get("expected")))
+        for row in rows
+        if "id" in row
+    }
+
+
 def eval_label_changes(
-    before: Sequence[Mapping[str, str]], after: Sequence[Mapping[str, str]]
+    before: Sequence[Mapping[str, Any]], after: Sequence[Mapping[str, Any]]
 ) -> list[str]:
-    now = {case["id"]: case["label"] for case in after}
+    then, now = eval_labels(before), eval_labels(after)
     changes = []
-    for case in before:
-        if case["id"] not in now:
-            changes.append(f"eval case {case['id']} removed")
-        elif now[case["id"]] != case["label"]:
-            changes.append(f"eval case {case['id']}: label {case['label']} -> {now[case['id']]}")
+    for case_id, expected in then.items():
+        if case_id not in now:
+            changes.append(f"eval case {case_id} removed")
+        elif now[case_id] != expected:
+            changes.append(f"eval case {case_id}: expected {expected} -> {now[case_id]}")
     return changes
