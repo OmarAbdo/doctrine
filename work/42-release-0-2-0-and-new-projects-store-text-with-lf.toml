@@ -1,0 +1,4 @@
+id = "42"
+title = "Release 0.2.0, and new projects store text with LF"
+kind = "feature"
+scope = ["pyproject.toml", "src/doctrine/__init__.py", "templates/python-hexagonal/.gitattributes", "tests/integration/test_template_line_endings.py", "tests/integration/test_line_endings.py"]

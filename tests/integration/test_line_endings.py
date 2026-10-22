@@ -13,6 +13,9 @@ FILES = 20
 
 def windows_files(project: Path) -> None:
     git(project, "config", "core.autocrlf", "false")
+    # New projects store text with LF; these notes keep the CRLF a repository from before had.
+    with (project / ".gitattributes").open("a", encoding="utf-8") as attributes:
+        attributes.write("notes/** -text\n")
     for number in range(FILES):
         (project / f"notes/{number}.txt").parent.mkdir(exist_ok=True)
         (project / f"notes/{number}.txt").write_bytes(b"one\r\ntwo\r\nthree\r\n")
