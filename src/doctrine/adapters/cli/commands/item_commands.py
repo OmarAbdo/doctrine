@@ -10,7 +10,6 @@ from doctrine.adapters.storage.project_files import Project
 from doctrine.adapters.storage.evidence_log import EvidenceLog
 from doctrine.adapters.storage.state_store import StateStore, now
 from doctrine.adapters.tools.git_repository import GitRepository
-from doctrine.adapters.tools.project_environment import project_command
 from doctrine.domain.governance.evidence import item_not_ready
 from doctrine.domain.governance.work_item import WorkItem, parse_work_item
 
@@ -120,11 +119,9 @@ def item_done(cwd: Path) -> int:
 def metric_record(cwd: Path) -> int:
     project = load_project(cwd)
     outcome = project.contract.outcome
-    command, environment = project_command(project, outcome.command)
     finished = subprocess.run(
-        command,
+        list(outcome.command),
         cwd=project.root,
-        env=environment,
         capture_output=True,
         text=True,
         timeout=METRIC_TIMEOUT_SECONDS,
