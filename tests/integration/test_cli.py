@@ -98,3 +98,20 @@ def test_a_failing_metric_command_records_nothing(
     monkeypatch.chdir(project)
     assert main(["metric", "record"]) == 1
     assert latest_metric(project) is None
+
+
+def test_a_finished_item_resumes_on_its_branch_after_review_feedback(
+    project: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(project)
+    scope = "src/sample_jobs/domain/**"
+    assert main(["item", "start", "--kind", "chore", "--title", "Tidy", "--scope", scope]) == 0
+    StateStore(project).update(item=None)
+    git(project, "add", "-A")
+    git(project, "-c", "core.hooksPath=/dev/null", "commit", "-q", "-m", "Tidy")
+    git(project, "switch", "-q", "main")
+    assert main(["item", "resume", "1"]) == 0
+    assert StateStore(project).active_item() == "1"
+    assert GitRepository(project).current_branch() == "item/1-tidy"
+    assert main(["item", "resume", "1"]) == 1
+    assert main(["item", "resume", "99"]) == 1
