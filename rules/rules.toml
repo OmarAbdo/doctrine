@@ -18,7 +18,8 @@ inheritance_depth = { max = 1 }      # bases of a class written in the project (
 interface_methods = { max = 5 }      # methods of one port or interface
 diff_coverage = { min = 85 }         # percent of changed lines a test runs
 mutation_score = { min = 70 }        # percent of mutants in changed code the tests kill
-item_lines = { max = 400 }           # lines a work item may add, net
+item_lines = { max = 400 }           # lines a work item changes, added plus removed
+item_files = { max = 15 }            # files a work item changes
 
 [bans]
 broad_catch = true                   # catching every exception
