@@ -1,0 +1,4 @@
+id = "48"
+title = "A new project with no tests yet passes doctrine check"
+kind = "fix"
+scope = ["src/doctrine/application/check.py", "src/doctrine/application/ports.py", "src/doctrine/adapters/cli/gates/red_first.py", "src/doctrine/adapters/tools/subprocess_runner.py", "tests/integration/test_fresh_project_check.py", "tests/unit/application/test_empty_test_run.py"]

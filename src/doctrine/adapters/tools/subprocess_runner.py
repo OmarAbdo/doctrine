@@ -54,4 +54,6 @@ class SubprocessRunner:
                 name=name, passed=False, output=f"{name} ran over {TIMEOUT_SECONDS} s"
             )
         output = (finished.stdout + finished.stderr).strip()
-        return ToolResult(name=name, passed=finished.returncode == 0, output=output)
+        return ToolResult(
+            name=name, passed=finished.returncode == 0, output=output, exit_code=finished.returncode
+        )
