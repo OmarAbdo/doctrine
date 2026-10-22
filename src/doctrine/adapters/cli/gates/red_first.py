@@ -7,6 +7,7 @@ from pathlib import Path, PurePosixPath
 
 from doctrine.adapters.storage.project_files import Project
 from doctrine.adapters.tools.git_repository import GitRepository
+from doctrine.adapters.tools.project_environment import ProjectEnvironment, import_roots
 from doctrine.adapters.tools.subprocess_runner import SubprocessRunner
 
 NO_TESTS_COLLECTED = 5
@@ -38,10 +39,9 @@ def run_on_base(project: Project, git: GitRepository, base: str, tests: list[str
         for path in tests:
             (tree / path).parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(project.root / path, tree / path)
-        roots = [tree, *(tree / Path(service.path).parent for service in project.contract.services)]
-        result = SubprocessRunner(tree, import_roots=roots).run(
-            "pytest", ["-q", "-p", "no:cacheprovider", *tests]
-        )
+        python = ProjectEnvironment(project).python()
+        runner = SubprocessRunner(tree, import_roots=import_roots(project, tree), python=python)
+        result = runner.run("pytest", ["-q", "-p", "no:cacheprovider", *tests])
         return (
             0
             if result.passed
