@@ -9,7 +9,7 @@ from doctrine.adapters.cli.console import complain, load_project, say
 from doctrine.adapters.cli.gates.github_reviews import owner_approved, pull_request_branch
 from doctrine.adapters.cli.gates.red_first import tests_fail_on_base
 from doctrine.adapters.storage.project_files import CONTRACT_FILE, Project
-from doctrine.adapters.tools.git_repository import GitRepository
+from doctrine.adapters.tools.git_repository import GitRepository, line_ending_only
 from doctrine.domain.governance.contract import parse_contract
 from doctrine.domain.governance.goalposts import contract_changes, eval_label_changes
 from doctrine.domain.governance.work_item import WorkItem
@@ -99,10 +99,13 @@ def scope_command(cwd: Path, base: str) -> int:
         return 1
     files = git.changed_files(base)
     problems = [f"{path} is outside item {item.id}'s scope" for path in item.out_of_scope(files)]
-    problems += size_problems(item, len(files), git.changed_lines(base), project)
+    read = [path for path in files if path not in line_ending_only(git, base)]
+    problems += size_problems(item, len(read), git.changed_lines(base), project)
     for problem in problems:
         complain(problem)
-    say(f"Item {item.id} ({item.kind}): {len(files)} files, {git.changed_lines(base)} lines.")
+    say(f"Item {item.id} ({item.kind}): {len(read)} files, {git.changed_lines(base)} lines.")
+    if len(read) < len(files):
+        say(f"{len(files) - len(read)} more files change only their line endings.")
     return 1 if problems else 0
 
 

@@ -47,13 +47,9 @@ class GitRepository:
         ]
 
     def changed_lines(self, base: str) -> int:
-        """Added plus removed lines: what a reviewer reads, not the net."""
-        total = 0
-        for line in self.git("diff", "--numstat", f"{base}...HEAD").splitlines():
-            added, removed, _path = line.split("\t", 2)
-            if added.isdigit() and removed.isdigit():
-                total += int(added) + int(removed)
-        return total
+        """Added plus removed lines: what a reviewer reads, not the net. A line whose only change
+        is its ending (CRLF to LF) is not read, so it doesn't count."""
+        return sum(line_counts(self, base, "--ignore-cr-at-eol").values())
 
     def file_at(self, revision: str, path: str) -> str | None:
         try:
@@ -69,3 +65,18 @@ class GitRepository:
 
     def create_branch(self, name: str) -> None:
         self.git("switch", "-c", name)
+
+
+def line_counts(git: GitRepository, base: str, *options: str) -> dict[str, int]:
+    """Added plus removed lines per changed file (binary files count none)."""
+    counts = {}
+    for line in git.git("diff", "--numstat", *options, f"{base}...HEAD").splitlines():
+        added, removed, path = line.split("\t", 2)
+        counts[path] = int(added) + int(removed) if added.isdigit() else 0
+    return counts
+
+
+def line_ending_only(git: GitRepository, base: str) -> set[str]:
+    """Files whose every change is a line ending (with those ignored, git leaves them out)."""
+    read = line_counts(git, base, "--ignore-cr-at-eol")
+    return {path for path, count in line_counts(git, base).items() if count and path not in read}
