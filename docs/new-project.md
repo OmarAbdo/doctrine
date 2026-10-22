@@ -60,7 +60,13 @@ Record it with `doctrine metric record`, even while it is 0. The line arms once 
 reaches the stop value, so recording 0 before launch doesn't stop it (#46). Everything after
 launch is judged against it.
 
-## 4. AI tasks
+## 4. Dependencies
+
+Declare third-party packages in `pyproject.toml` and run `doctrine deps lock` before the first
+item that imports them; the project's tools then run in `.venv` with them (docs/working-in-a-project.md,
+"Dependencies").
+
+## 5. AI tasks
 
 If the project uses a model, declare each prompt as an `[[ai_tasks]]` entry with an eval set
 before it ships (docs/evals.md). Log real traces from day one: they are what Omar labels.

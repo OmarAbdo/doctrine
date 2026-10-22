@@ -78,6 +78,19 @@ their own: first the domain, then the adapter, then the command.
   anyway: the history shows when the project launched.
 - **First item of a new project:** agree the metric with Omar and define it.
 
+## Dependencies
+
+- **What:** third-party packages go in `pyproject.toml` `[project] dependencies`, then run
+  `doctrine deps lock`. It resolves them with pip and writes `requirements.lock`: every package,
+  transitive ones included, at an exact version with the sha256 of every published file. Commit both
+  files together.
+- **How they're used:** with a lock present, doctrine builds `.venv` from its own pinned tools plus
+  the lock (`--require-hashes`) and runs every tool there: check, test, coverage, red-first and
+  mutants. The outcome and AI task commands run with that Python when they start with `python`, and
+  `src/` is on their import path. The environment is rebuilt by itself when a lock changes; never
+  `pip install` into it by hand, because CI builds it from the lock alone.
+- **Why hashed:** a project's packages are as much a supply-chain risk as doctrine's own tools.
+
 ## AI tasks
 
 A prompt change needs a measured score. See docs/evals.md:
@@ -96,6 +109,7 @@ doctrine eval label <judge> --traces traces.jsonl # Omar labels real outputs for
 | `doctrine test [paths]` | Runs the tests and records the run (red or green) as evidence |
 | `doctrine check` | Every rule on every service |
 | `doctrine metric record` | Records the outcome metric |
+| `doctrine deps lock` | Locks `pyproject.toml`'s dependencies into `requirements.lock` |
 | `doctrine eval run <task>` | Runs an AI task on its eval set and records the score |
 | `doctrine eval label <judge> --traces <file>` | Opens the labelling page |
 | `doctrine selftest` | The share of bad samples and bypasses doctrine catches |
