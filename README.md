@@ -1,74 +1,56 @@
 # Doctrine
 
-The rules every project starts from, enforced by machinery Claude Code can't loosen. Written after
-HQ, where a capable assistant shipped 95 commits in two days while the one number that mattered
-(applications sent per day) fell from 18 to 0.
+The rules every project starts from, enforced by machinery that Claude Code can't loosen. Doctrine
+was written after HQ, where a capable assistant shipped 95 commits in two days while the one number
+that mattered (applications sent per day) fell from 18 to 0.
 
-## What it enforces, and where
+**What:** hooks on every Claude Code session, a git hook, CI gates and branch protection. Together
+they hold a project to readable code, tests written first, small reviewed pull requests, a measured
+outcome and measured AI prompts.
+**Why:** written rules (CLAUDE.md, invariants, 394 tests) didn't stop HQ from drifting, so doctrine
+enforces its rules in code. CLAUDE.md is only the map.
+**Who:** Omar owns it and approves every change. The bot account OmarAbdosBot does all of Claude's
+GitHub work. Claude builds under doctrine's own rules.
+**Where:** this repository (public, so that main can be protected on GitHub Free), installed on
+Omar's PC under `C:\Program Files\Doctrine` and `C:\Program Files\ClaudeCode`.
+**When:** built on 2026-10-21 and 2026-10-22; it updates itself from main every 30 minutes.
 
-| Layer | What runs there | Can Claude loosen it? |
-|---|---|---|
-| Admin settings (`C:\Program Files\ClaudeCode`) | Hooks on every session: refused shortcuts, item scope, failing test first, a formatted and linted file after every edit, no "it works" over unchecked changes, a session brief | No: admin-only files, managed hooks can't be disabled |
-| Git | `pre-commit` runs `doctrine check` | Only with `--no-verify`, which the hooks refuse |
-| CI (`project-gates.yml`) | Every rule again, the item's scope and size, new tests fail on the code before the change, changed lines tested, goalposts unchanged or approved | No: it judges the committed result |
-| The contract (`doctrine.toml`) | Outcome metric, services, a project's stricter limits | Tightening is free; loosening fails CI until the approver approves the pull request |
+## Read this first
 
-## The rules
+| You want to | Read |
+|---|---|
+| Know why doctrine exists and how it came to be | [docs/history.md](docs/history.md) |
+| Know why it is built this way, and what was rejected | [docs/decisions.md](docs/decisions.md) |
+| See what is enforced, where, and what a refusal means | [docs/enforcement.md](docs/enforcement.md) |
+| Work in a doctrine project: items, tests, pull requests | [docs/working-in-a-project.md](docs/working-in-a-project.md) |
+| Understand the code rules, test kinds, coverage and mutation testing | [docs/code-quality.md](docs/code-quality.md) |
+| Measure an AI prompt or judge: eval sets, runs, labels | [docs/evals.md](docs/evals.md) |
+| Start a new project from doctrine | [docs/new-project.md](docs/new-project.md) |
+| Install, update or repair doctrine on the PC | [docs/machine.md](docs/machine.md) |
+| Change doctrine's own code | [docs/code-map.md](docs/code-map.md) |
+| Know what is not built and what is open | [docs/roadmap.md](docs/roadmap.md) |
 
-One table, [rules/rules.toml](rules/rules.toml): function length, complexity, nesting, parameters,
-file length, folder size, names of real words, line length, public methods, imports per module,
-no inheritance from concrete classes, small interfaces, diff coverage, item size; bans on broad
-catches, suppression comments, flag arguments, print and network calls without a timeout. Each
-language profile turns the table into its tools' settings, so no config file can drift from it.
-
-Python profile: ruff, pylint (what ruff lacks), `mypy --strict`, pytest, plus doctrine's own rules
-on names, function length, hexagonal layers (the domain imports only the standard library), folder
-size and a test of the right kind for every module (unit for domain and application, integration
-for adapters).
-
-## How a change goes
+## How a change goes, in one screen
 
 ```
-doctrine item start --kind feature --title "Search by city" --scope src/jobs/search/**
+doctrine item start --kind feature --title "Search by city" --scope "src/jobs/search/**"
 # write the failing test
 doctrine test            # recorded red
 # write the code; every edit is formatted and linted on the spot
 doctrine test            # green
 doctrine check           # every rule
-doctrine item done       # only with a red run, a passing check, nothing unchecked
-git push -u origin item/1-search-by-city && gh pr create --fill
+doctrine item done       # only with a red run, a passing check and nothing unchecked
+git push -u origin HEAD && gh pr create --title "..." --body-file body.md
 ```
 
-Claude never merges. The pull request merges itself (`merge.yml`) once every gate passed on its
-latest commit, and, where the goalposts moved or the branch protection asks for it, once the
-approver approved that commit.
-
-`doctrine metric record` runs the project's outcome command. When the value falls under its stop
-value, only `restore` items may change code until it recovers.
+Claude never merges. The pull request merges itself once every gate has passed on its latest
+commit and Omar has approved that commit.
 
 ## Proof that it works
 
 - `doctrine check` on doctrine itself: every rule, every tool.
-- `doctrine selftest`: every bad sample in [samples/python](samples/python) and every bypass in
-  [samples/attacks.toml](samples/attacks.toml) must be caught; the share caught is doctrine's own
-  outcome metric. A new escape is added there first, failing, then closed.
-- Live run (2026-10-21) in a real Claude Code session in bypass-permissions mode: `--no-verify`,
-  code without an item, a hand-written work item and a push to main were all refused; a final
-  "everything is fixed and verified" over unchecked changes was sent back, and the session ran
-  `doctrine check` and reported the failure instead.
-
-## Install
-
-Once, as administrator, from this repository:
-`powershell -ExecutionPolicy Bypass -File policy\install.ps1 -BotToken <token>`.
-
-After that doctrine keeps itself current. The "Doctrine update" task (SYSTEM, every 30 minutes and
-at startup) installs what was merged to the protected main, where every change needed the
-approver: into a new folder under `C:\Program Files\Doctrine\releases`, where its self-test must
-catch everything before the admin settings switch over. A running session keeps the release it
-started with. Failures go to `C:\Program Files\Doctrine\update.log` and leave the current release
-in place. Run the installer again only to change the bot token.
-
-## Not built yet
-
-The mutation and eval gates in CI, and the eval kit's labelling page and judge alignment.
+- `doctrine selftest`: every bad sample in [samples/python](samples/python) and every bypass
+  attempt in [samples/attacks.toml](samples/attacks.toml) must be caught (52 of 52 on
+  2026-10-22). The share caught is doctrine's own outcome metric.
+- Doctrine has been built under its own rules since its fourth pull request. It refused its own
+  author's shortcuts, and every refusal that turned out wrong was fixed through a reviewed item.
