@@ -123,3 +123,15 @@ def test_work_items_and_the_metric_history_are_written_by_doctrine_commands_only
     decision = decide_tool_use(edit(path), READY)
     assert not decision.allowed
     assert "doctrine" in decision.reason
+
+
+def test_a_template_of_a_protected_file_deeper_in_a_project_is_ordinary_code() -> None:
+    """Doctrine's own project template holds .github/workflows/doctrine.yml; only the one at a
+    project's root is the project's gate."""
+    templates = replace(READY, item=replace(ITEM, scope=("templates/**",)))
+    template = "D:/work/jobs/templates/python/.github/workflows/doctrine.yml"
+    assert decide_tool_use(edit(template), templates).allowed
+    assert not decide_tool_use(
+        edit("D:/work/jobs/.github/workflows/doctrine.yml"), templates
+    ).allowed
+    assert not decide_tool_use(edit("D:/work/jobs/.git/hooks/pre-commit"), templates).allowed

@@ -1,0 +1,4 @@
+id = "17"
+title = "Project files are protected at the project root, not anywhere in a path"
+kind = "fix"
+scope = ["src/doctrine/domain/safety/protected.py", "src/doctrine/application/guard.py"]
