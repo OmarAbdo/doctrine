@@ -1,0 +1,4 @@
+id = "44"
+title = "Release tags are made after the merge workflow, not on a push it never triggers"
+kind = "fix"
+scope = [".github/workflows/release.yml", "tests/integration/test_release_after_merge.py"]
