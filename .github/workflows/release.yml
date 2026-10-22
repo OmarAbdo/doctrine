@@ -1,0 +1,28 @@
+# New projects pin a doctrine release tag (docs/new-project.md). When main's pyproject.toml names a
+# version that has no tag yet, this tags main's commit as v<version>, so nobody has to remember.
+name: release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Tag the version if it is new
+        run: |
+          version=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+            echo "v$version is already tagged."
+            exit 0
+          fi
+          git tag "v$version" "$GITHUB_SHA"
+          git push origin "v$version"
