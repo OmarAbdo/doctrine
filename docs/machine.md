@@ -69,6 +69,7 @@ the installer again with `-BotToken`.
 | `update.log` shows a failure and the release doesn't change | The new release failed its build or self-test | Read the line. If main is broken, fix it through a pull request; the current release stays in place meanwhile |
 | `last-check.json` is old | The task isn't running | Task Scheduler: check "Doctrine update" is enabled. Its last result should be 0 |
 | `'C:\Program' is not recognized` in Git Bash | An old shim | Fixed in #13. Run the installer again if `bin\doctrine` is missing |
+| A `logs/` folder with `mcp-puppeteer-*.log` appears in a project | puppeteer-mcp-server logs into its working directory | Fixed on 2026-10-22: `~/.claude/mcp-wrappers/puppeteer.mjs` moves it to `~/.claude/logs/puppeteer` before starting it. Delete stray `logs/` folders |
 | PC slow, hundreds of `git.exe fsmonitor--daemon` processes | Git's fsmonitor (Git for Windows turns it on system-wide) | `git config --global core.fsmonitor false`, then end the daemons. Doctrine's own calls already turn it off |
 | Hooks seem not to run | VS Code or Claude Code started before the install | Restart them. `doctrine` on the PATH needs a new terminal |
 | A refusal that looks wrong | A bug in doctrine | Tell Omar, then fix it through an item in this repository. Never work around it |

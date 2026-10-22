@@ -9,5 +9,3 @@ jobs:
     uses: {{doctrine_repository}}/.github/workflows/project-gates.yml@v{{version}}
     with:
       doctrine_ref: v{{version}}
-    secrets:
-      doctrine_token: ${{ secrets.DOCTRINE_TOKEN }}
