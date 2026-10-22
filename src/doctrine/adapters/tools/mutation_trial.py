@@ -10,6 +10,7 @@ from pathlib import Path
 
 from doctrine.adapters.storage.project_files import Project
 from doctrine.adapters.tools.git_repository import GitRepository
+from doctrine.adapters.tools.project_environment import ProjectEnvironment, import_roots
 from doctrine.adapters.tools.subprocess_runner import SubprocessRunner
 from doctrine.application.mutation import ChangedModule
 
@@ -63,9 +64,8 @@ class MutantTrial:
         shutil.rmtree(self.folder, ignore_errors=True)
 
     def runner(self) -> SubprocessRunner:
-        services = self.project.contract.services
-        roots = [self.copy, *(self.copy / Path(service.path).parent for service in services)]
-        return SubprocessRunner(self.copy, import_roots=roots)
+        python = ProjectEnvironment(self.project).python()
+        return SubprocessRunner(self.copy, import_roots(self.project, self.copy), python=python)
 
     def tests_fail(self, path: str, mutated: str) -> bool:
         """Whether the unit tests catch this mutant of `path`."""
