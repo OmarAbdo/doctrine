@@ -73,6 +73,8 @@ def ai_task_changes(before: Contract, after: Contract) -> list[str]:
             changes.append(f"ai task {task.name} removed")
         elif current.minimum < task.minimum:
             changes.append(f"ai task {task.name}: minimum {task.minimum:g} -> {current.minimum:g}")
+        elif task.judge and not current.judge:
+            changes.append(f"ai task {task.name}: no longer a judge")
     return changes
 
 
