@@ -1,0 +1,4 @@
+id = "10"
+title = "AI tasks with eval sets in the contract"
+kind = "feature"
+scope = ["src/doctrine/domain/evals/**", "src/doctrine/domain/governance/contract.py", "src/doctrine/domain/governance/goalposts.py"]
