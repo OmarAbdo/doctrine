@@ -1,0 +1,4 @@
+id = "25"
+title = "An AI task runs on its eval set and its result is recorded"
+kind = "feature"
+scope = ["src/doctrine/domain/evals/**", "src/doctrine/application/evals.py", "src/doctrine/adapters/storage/eval_files.py", "src/doctrine/adapters/tools/task_command.py", "tests/integration/test_eval_run.py", "tests/unit/application/test_evals.py", "tests/unit/domain/evals/**"]
