@@ -10,6 +10,7 @@ class ToolResult:
     name: str
     passed: bool
     output: str
+    exit_code: int = 0
 
 
 class ToolRunner(Protocol):

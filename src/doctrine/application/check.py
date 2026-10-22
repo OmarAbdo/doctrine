@@ -23,6 +23,8 @@ from doctrine.domain.python.source import (
 )
 from doctrine.domain.rules.table import RuleTable
 
+NO_TESTS_COLLECTED = 5  # pytest's exit code when it found no tests
+
 
 @dataclass(frozen=True)
 class ServiceSources:
@@ -99,5 +101,13 @@ def check_python_service(
     service: Service, rules: RuleTable, sources: ServiceSources, runner: ToolRunner
 ) -> CheckReport:
     commands = tool_commands(rules, service)
-    tools = [runner.run(command.name, command.arguments) for command in commands]
+    tools = [judged(runner.run(command.name, command.arguments)) for command in commands]
     return CheckReport(findings=source_findings(service, rules, sources), tools=tools)
+
+
+def judged(result: ToolResult) -> ToolResult:
+    """A service with no tests yet (fresh from `doctrine init`) makes pytest collect nothing. That
+    is no failure: the test_kinds rule already demands a test for every module."""
+    if result.name == "pytest" and result.exit_code == NO_TESTS_COLLECTED:
+        return ToolResult(name=result.name, passed=True, output=result.output)
+    return result
