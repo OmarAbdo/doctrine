@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 
 from doctrine.adapters.cli.console import complain, load_project, say
-from doctrine.adapters.storage.metric_log import append_metric
+from doctrine.adapters.storage.metric_log import append_metric, metric_values
 from doctrine.adapters.storage.project_files import Project
 from doctrine.adapters.storage.evidence_log import EvidenceLog
 from doctrine.adapters.storage.state_store import StateStore, now
@@ -134,6 +134,9 @@ def metric_record(cwd: Path) -> int:
     value = float(lines[-1])
     append_metric(project.root, value, now())
     EvidenceLog(project.root).record("metric", f"{value:g}", detail=outcome.metric)
-    stopped = " LINE STOPPED." if outcome.line_stopped(value) else ""
+    values = metric_values(project.root)
+    stopped = " LINE STOPPED." if outcome.line_stopped(values) else ""
+    if not outcome.launched(values):
+        stopped = f" Not launched: the line arms once a value reaches {outcome.stop_value:g}."
     say(f"{outcome.metric}: {value:g} (stops below {outcome.stop_value:g}).{stopped}")
     return 0

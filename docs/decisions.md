@@ -111,7 +111,9 @@ decision here, keeping the old one struck through below it.
 
 - **What:** every project names one number it exists to move, with a command that computes it
   from real data and a stop value. When `doctrine metric record` falls under the stop value, only
-  `restore` items may change code until it recovers.
+  `restore` items may change code until it recovers. The line arms at launch: until a recorded
+  value has reached the stop value, nothing stops it (2026-10-22, #46). A project that hasn't
+  shipped measures 0 and would otherwise stop its own line on its first record.
 - **Why:** HQ shipped 95 commits while its number fell to 0. Activity is not progress.
 - **Doctrine's own metric:** the share of bad samples and bypass attempts its self-test catches
   (it stops below 1).

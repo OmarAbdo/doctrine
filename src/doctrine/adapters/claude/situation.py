@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from doctrine.adapters.storage.metric_log import latest_metric
+from doctrine.adapters.storage.metric_log import latest_metric, metric_values
 from doctrine.adapters.storage.project_files import Project, find_root
 from doctrine.adapters.storage.evidence_log import EvidenceLog
 from doctrine.adapters.storage.state_store import StateStore
@@ -30,14 +30,14 @@ def situation_for(cwd: Path) -> Situation:
     project, state = Project.load(root), StateStore(root)
     item_id = state.active_item()
     item = project.work_item(item_id) if item_id else None
-    latest = latest_metric(root)
+    values = metric_values(root)
     return Situation(
         root=str(root),
         source_roots=tuple(service.path for service in project.contract.services),
         branch=GitRepository(root).current_branch(),
         item=item,
         red_seen=item is not None and EvidenceLog(root).red_seen(item.id),
-        line_stopped=latest is not None and project.contract.outcome.line_stopped(latest),
+        line_stopped=project.contract.outcome.line_stopped(values),
         unchecked_changes=state.unchecked_changes(),
     )
 
@@ -55,6 +55,7 @@ def status_for(cwd: Path) -> ProjectStatus | None:
         metric=outcome.metric,
         latest=latest_metric(root),
         stop_value=outcome.stop_value,
+        launched=outcome.launched(metric_values(root)),
         item=f"{item.id} {item.title} ({item.kind})" if item else None,
         branch=GitRepository(root).current_branch(),
     )

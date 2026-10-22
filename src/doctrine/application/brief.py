@@ -16,15 +16,19 @@ class ProjectStatus:
     stop_value: float
     item: str | None
     branch: str
+    launched: bool = True
 
     @property
     def line_stopped(self) -> bool:
-        return self.latest is not None and self.latest < self.stop_value
+        return self.launched and self.latest is not None and self.latest < self.stop_value
 
 
 def outcome_line(status: ProjectStatus) -> str:
     if status.latest is None:
         return f"Outcome {status.metric}: not recorded yet (`doctrine metric record`)"
+    if not status.launched:
+        arms = f"the line arms once a recorded value reaches {status.stop_value:g}"
+        return f"Outcome {status.metric}: {status.latest:g} (not launched: {arms})"
     return f"Outcome {status.metric}: {status.latest:g} (stops below {status.stop_value:g})"
 
 

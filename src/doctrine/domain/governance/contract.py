@@ -1,6 +1,6 @@
 """A project's contract (doctrine.toml): outcome metric, services and its own stricter limits."""
 
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -28,8 +28,14 @@ class Outcome:
     def stop_value(self) -> float:
         return self.baseline * self.stop_below
 
-    def line_stopped(self, value: float) -> bool:
-        return value < self.stop_value
+    def launched(self, values: Sequence[float]) -> bool:
+        """A project that hasn't shipped honestly measures 0; it has launched once a recorded
+        value reached the stop value."""
+        return any(value >= self.stop_value for value in values)
+
+    def line_stopped(self, values: Sequence[float]) -> bool:
+        """The recorded values, oldest first: after launch, the latest fell under the stop value."""
+        return self.launched(values) and values[-1] < self.stop_value
 
 
 @dataclass(frozen=True)
