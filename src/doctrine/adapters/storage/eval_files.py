@@ -32,7 +32,16 @@ class EvalFiles:
         return parse_results(json_lines(self.root / self.task.results))
 
     def record(self, result: EvalResult) -> None:
-        path = self.root / self.task.results
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open("a", encoding="utf-8", newline="\n") as handle:
-            handle.write(json.dumps(result_line(result)) + "\n")
+        append_line(self.root / self.task.results, result_line(result))
+
+    def case_rows(self) -> list[dict[str, Any]]:
+        return json_lines(self.root / self.task.cases)
+
+    def add_case(self, row: dict[str, Any]) -> None:
+        append_line(self.root / self.task.cases, row)
+
+
+def append_line(path: Path, row: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8", newline="\n") as handle:
+        handle.write(json.dumps(row) + "\n")

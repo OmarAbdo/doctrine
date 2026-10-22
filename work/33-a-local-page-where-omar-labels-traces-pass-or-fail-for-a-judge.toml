@@ -1,0 +1,4 @@
+id = "33"
+title = "A local page where Omar labels traces pass or fail for a judge"
+kind = "feature"
+scope = ["src/doctrine/domain/evals/labels.py", "src/doctrine/adapters/storage/eval_files.py", "src/doctrine/adapters/web/**", "tests/unit/domain/evals/test_labels.py", "tests/integration/test_label_page.py"]
