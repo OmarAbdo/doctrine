@@ -21,10 +21,13 @@ TIMEOUT_SECONDS = 900
 
 
 class SubprocessRunner:
-    """Runs tools in `root` with `import_roots` on the import path."""
+    """Runs tools in `root` with `import_roots` on the import path, on `python` (doctrine's own
+    unless the project has an environment of its own)."""
 
-    def __init__(self, root: Path, import_roots: Sequence[Path]) -> None:
-        self.root, self.import_roots = root, import_roots
+    def __init__(
+        self, root: Path, import_roots: Sequence[Path], python: str = sys.executable
+    ) -> None:
+        self.root, self.import_roots, self.python = root, import_roots, python
 
     def environment(self) -> dict[str, str]:
         paths = [str(path) for path in self.import_roots]
@@ -36,7 +39,7 @@ class SubprocessRunner:
         }
 
     def run(self, name: str, arguments: Sequence[str]) -> ToolResult:
-        command = [sys.executable, "-m", MODULES[name], *arguments]
+        command = [self.python, "-m", MODULES[name], *arguments]
         try:
             finished = subprocess.run(
                 command,
