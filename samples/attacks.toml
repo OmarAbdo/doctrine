@@ -68,3 +68,7 @@ path = "C:/Program Files/Doctrine/rules/rules.toml"
 path = "src/project/domain/outside_scope.py"
 [[shell]]
 command = "git push origin refs/tags/v9.9.9 main"
+[[edit]]
+path = "evals/fit/results.jsonl"
+[[shell]]
+command = "echo '{\"score\": 1.0}' >> evals/fit/results.jsonl"

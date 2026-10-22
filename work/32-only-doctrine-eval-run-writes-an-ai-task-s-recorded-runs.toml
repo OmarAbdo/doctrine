@@ -1,0 +1,4 @@
+id = "32"
+title = "Only doctrine eval run writes an AI task's recorded runs"
+kind = "feature"
+scope = ["src/doctrine/domain/safety/protected.py", "tests/unit/domain/safety/test_eval_records_protected.py", "samples/attacks.toml"]
