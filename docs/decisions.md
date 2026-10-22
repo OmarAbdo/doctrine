@@ -189,3 +189,17 @@ decision here, keeping the old one struck through below it.
   carriage returns at line ends.
 - **Rejected:** letting oversized items through with an approval. That would have created an
   exception path for a problem that could be solved without one.
+
+## D21. A project's dependencies are locked with hashes and its tools run in its own environment
+
+- **When, who:** 2026-10-22, Claude, after Hunter's thread found that a project couldn't import
+  any third-party package (#45, #47).
+- **What:** `doctrine deps lock` writes `requirements.lock` (exact versions, every published
+  file's sha256). With a lock, doctrine builds `.venv` from its pinned tools plus the lock and runs
+  every tool and command there. The project itself isn't installed into it: its code comes from the
+  import path, so mutants and the red-first worktree test the copy they are meant to test.
+- **Why:** tools must import what the project imports, and the packages must be exactly what was
+  reviewed.
+- **Rejected:** `pip install -e .` into the environment (it would point mutants and red-first at
+  the real project, not their copy); unhashed installs (a supply-chain hole doctrine closes for
+  its own tools).

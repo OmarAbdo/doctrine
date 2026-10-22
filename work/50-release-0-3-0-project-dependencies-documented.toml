@@ -1,0 +1,4 @@
+id = "50"
+title = "Release 0.3.0: project dependencies, documented"
+kind = "chore"
+scope = ["pyproject.toml", "src/doctrine/__init__.py", "docs/working-in-a-project.md", "docs/new-project.md", "docs/code-quality.md", "docs/decisions.md"]

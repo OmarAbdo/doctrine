@@ -52,7 +52,9 @@ Loosening one, in a project or in this table, waits for Omar's approval.
   the layout rules below.
 
 Tool versions are pinned with every file's sha256 (`requirements/tools.txt`, installed with
-`--require-hashes`).
+`--require-hashes`). A project's own dependencies are locked the same way (`requirements.lock`,
+from `doctrine deps lock`), and with a lock the tools run in the project's `.venv`, where they can
+import what the project imports.
 
 ## Where code goes: hexagonal layers
 
