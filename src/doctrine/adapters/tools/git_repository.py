@@ -6,6 +6,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 TIMEOUT_SECONDS = 60
+# core.fsmonitor starts a background daemon per repository that never exits; doctrine never wants
+# one (2026-10-22: 921 of them, from test repositories, ran the PC out of memory).
+NO_DAEMON = ("-c", "core.fsmonitor=false")
 ITEM_BRANCH = re.compile(r"(?:^|/)item/(\d+)-")
 
 
@@ -19,7 +22,7 @@ class GitRepository:
 
     def git(self, *arguments: str) -> str:
         finished = subprocess.run(
-            ["git", *arguments],
+            ["git", *NO_DAEMON, *arguments],
             cwd=self.root,
             capture_output=True,
             text=True,

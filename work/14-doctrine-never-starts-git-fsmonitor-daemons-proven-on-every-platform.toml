@@ -1,0 +1,4 @@
+id = "14"
+title = "Doctrine never starts git fsmonitor daemons, proven on every platform"
+kind = "fix"
+scope = ["src/doctrine/adapters/tools/git_repository.py", "src/doctrine/adapters/cli/init_command.py"]

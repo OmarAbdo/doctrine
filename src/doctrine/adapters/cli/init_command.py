@@ -7,6 +7,7 @@ from pathlib import Path
 from doctrine import __version__
 from doctrine.adapters.cli.console import complain, say
 from doctrine.adapters.storage.project_files import CONTRACT_FILE, DOCTRINE_HOME
+from doctrine.adapters.tools.git_repository import NO_DAEMON
 
 TEMPLATE = DOCTRINE_HOME / "templates" / "python-hexagonal"
 DOCTRINE_REPOSITORY = "OmarAbdo/doctrine"
@@ -47,7 +48,10 @@ def copy_template(target: Path, values: dict[str, str]) -> list[Path]:
 def install_git_hook(target: Path) -> None:
     if not (target / ".git").exists():
         subprocess.run(
-            ["git", "init", "-q", "-b", "main"], cwd=target, check=True, timeout=GIT_TIMEOUT_SECONDS
+            ["git", *NO_DAEMON, "init", "-q", "-b", "main"],
+            cwd=target,
+            check=True,
+            timeout=GIT_TIMEOUT_SECONDS,
         )
     hook = target / ".git" / "hooks" / "pre-commit"
     hook.write_text(PRE_COMMIT, encoding="utf-8", newline="\n")
