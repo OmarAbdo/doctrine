@@ -1,0 +1,4 @@
+id = "13"
+title = "doctrine works in Git Bash with quoted arguments"
+kind = "fix"
+scope = ["policy/**"]

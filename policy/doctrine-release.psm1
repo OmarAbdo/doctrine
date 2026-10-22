@@ -49,6 +49,12 @@ function Get-ShimText([string]$Python) {
     return "@echo off`r`n`"$Python`" -I -m doctrine %*`r`n"
 }
 
+function Get-BashShimText([string]$Python) {
+    # Git Bash (Claude Code's shell on Windows) loses quoted arguments through cmd.exe, so it gets
+    # its own launcher: a shell script it finds on PATH as plain `doctrine`.
+    return "#!/bin/sh`n# The current doctrine release, written by doctrine's installer.`nexec `"$($Python.Replace('\', '/'))`" -I -m doctrine `"`$@`"`n"
+}
+
 function Select-PrunableReleases([string[]]$Releases, [string]$Current, [int]$Keep = $KeepReleases) {
     # Releases oldest first. The newest $Keep stay, and the current one always stays.
     $old = @($Releases | Select-Object -First ([Math]::Max(0, $Releases.Count - $Keep)))
@@ -130,6 +136,7 @@ function Set-CurrentRelease {
     Copy-Item "$Release\source\policy\CLAUDE.md" (Join-Path $ClaudeDir "CLAUDE.md") -Force
     New-Item -ItemType Directory -Force "$HomeDir\bin" | Out-Null
     Write-Atomically "$HomeDir\bin\doctrine.cmd" (Get-ShimText $venvPython)
+    Write-Atomically "$HomeDir\bin\doctrine" (Get-BashShimText $venvPython)
     Write-Atomically $settings $text
     $at = (Get-Date).ToUniversalTime().ToString("s") + "Z"
     $installed = [ordered]@{ commit = $Commit; release = $Release; python = $Python; at = $at }

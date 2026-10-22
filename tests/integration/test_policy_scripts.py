@@ -76,6 +76,19 @@ def test_the_doctrine_command_runs_the_current_release_isolated() -> None:
     assert '"C:\\Doctrine\\releases\\abc\\venv\\Scripts\\python.exe" -I -m doctrine %*' in shim
 
 
+def test_git_bash_gets_its_own_launcher_that_keeps_quoted_arguments() -> None:
+    """cmd.exe drops the quotes of `doctrine.cmd item start --title "Two words"` when Git Bash
+    (Claude Code's shell on Windows) starts it; a shell script keeps them."""
+    script = powershell(
+        "Get-BashShimText -Python 'C:\\Doctrine\\releases\\abc\\venv\\Scripts\\python.exe'"
+    )
+    lines = script.splitlines()
+    assert lines[0] == "#!/bin/sh"
+    assert (
+        lines[-1] == 'exec "C:/Doctrine/releases/abc/venv/Scripts/python.exe" -I -m doctrine "$@"'
+    )
+
+
 def test_old_releases_are_pruned_but_never_the_current_one() -> None:
     script = (
         "ConvertTo-Json -Compress -InputObject @(Select-PrunableReleases "
