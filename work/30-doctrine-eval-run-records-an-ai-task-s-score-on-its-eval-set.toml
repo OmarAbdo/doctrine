@@ -1,0 +1,4 @@
+id = "30"
+title = "doctrine eval run records an AI task's score on its eval set"
+kind = "feature"
+scope = ["src/doctrine/application/evals.py", "src/doctrine/adapters/cli/main.py", "src/doctrine/adapters/cli/commands/eval_command.py", "tests/integration/test_eval_command.py", "tests/unit/application/test_judge_runs.py"]
