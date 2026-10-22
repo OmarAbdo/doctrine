@@ -1,0 +1,4 @@
+id = "31"
+title = "CI refuses a prompt or eval set change without a recorded run that holds up"
+kind = "feature"
+scope = ["src/doctrine/adapters/cli/gates/eval_gate.py", "src/doctrine/adapters/cli/main.py", ".github/workflows/self.yml", ".github/workflows/project-gates.yml", "tests/integration/test_eval_gate.py"]

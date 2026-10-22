@@ -40,4 +40,5 @@ jobs:
           doctrine ci red-first --base origin/${{ github.event.pull_request.base.ref }}
           doctrine ci coverage --base origin/${{ github.event.pull_request.base.ref }}
           doctrine ci description --base origin/${{ github.event.pull_request.base.ref }}
+          doctrine ci evals --base origin/${{ github.event.pull_request.base.ref }}
           doctrine ci goalposts --base origin/${{ github.event.pull_request.base.ref }}
