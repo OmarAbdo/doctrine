@@ -1,0 +1,4 @@
+id = "41"
+title = "Documentation: the machine, new projects and the code map"
+kind = "chore"
+scope = ["docs/machine.md", "docs/new-project.md", "docs/code-map.md"]
