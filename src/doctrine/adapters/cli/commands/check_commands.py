@@ -6,13 +6,14 @@ from doctrine.adapters.cli.console import complain, load_project, say, shorten
 from doctrine.adapters.storage.project_files import Project
 from doctrine.adapters.storage.evidence_log import EvidenceLog
 from doctrine.adapters.storage.state_store import StateStore
+from doctrine.adapters.tools.project_environment import ProjectEnvironment, import_roots
 from doctrine.adapters.tools.subprocess_runner import SubprocessRunner
 from doctrine.application.check import CheckReport, check_python_service
 
 
 def runner_for(project: Project) -> SubprocessRunner:
-    roots = [project.root / Path(service.path).parent for service in project.contract.services]
-    return SubprocessRunner(project.root, import_roots=[project.root, *roots])
+    python = ProjectEnvironment(project).python()
+    return SubprocessRunner(project.root, import_roots=import_roots(project), python=python)
 
 
 def report_lines(service_name: str, report: CheckReport) -> list[str]:

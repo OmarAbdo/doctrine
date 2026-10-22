@@ -1,0 +1,4 @@
+id = "49"
+title = "A project's tools and commands run in its own environment with its locked dependencies"
+kind = "feature"
+scope = ["src/doctrine/adapters/tools/project_environment.py", "src/doctrine/adapters/tools/subprocess_runner.py", "src/doctrine/adapters/tools/task_command.py", "src/doctrine/adapters/tools/mutation_trial.py", "src/doctrine/adapters/cli/commands/check_commands.py", "src/doctrine/adapters/cli/commands/item_commands.py", "src/doctrine/adapters/cli/commands/eval_command.py", "src/doctrine/adapters/cli/gates/red_first.py", "tests/integration/test_project_environment.py", "pyproject.toml", "src/doctrine/__init__.py"]
