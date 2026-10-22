@@ -1,0 +1,4 @@
+id = "8"
+title = "The edit review applies the rules doctrine check applies"
+kind = "fix"
+scope = ["src/doctrine/adapters/claude/edit_review.py"]

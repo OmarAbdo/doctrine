@@ -68,6 +68,16 @@ def test_a_changed_file_with_problems_goes_straight_back_to_claude(
     assert edit_review.review_edit(project.parent / "elsewhere.py") == []
 
 
+def test_a_test_file_is_held_to_the_linters_not_to_the_source_rules(project: Path) -> None:
+    test_file = write(
+        project,
+        "tests/unit/test_paths.py",
+        "from pathlib import Path\n\n\ndef test_folder(tmp_path: Path) -> None:\n"
+        "    assert tmp_path.exists()\n",
+    )
+    assert edit_review.review_edit(test_file) == []
+
+
 def test_a_claim_over_unchecked_changes_is_sent_back_then_let_go_after_three_tries(
     project: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
