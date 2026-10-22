@@ -10,6 +10,7 @@ from pathlib import Path
 from doctrine.adapters.claude.hooks import HANDLERS, run_hook
 from doctrine.adapters.cli.commands import (
     check_commands,
+    eval_command,
     init_command,
     item_commands,
     selftest_command,
@@ -44,6 +45,14 @@ def work_parsers(commands: argparse._SubParsersAction[argparse.ArgumentParser]) 
     init.add_argument("--approver", required=True)
 
 
+def eval_parsers(commands: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
+    evals = commands.add_parser("eval", help="AI tasks on their eval sets").add_subparsers(
+        dest="action", required=True
+    )
+    run = evals.add_parser("run", help="run an AI task on its eval set and record its score")
+    run.add_argument("task")
+
+
 def ci_parsers(commands: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     gates = commands.add_parser("ci", help="checks CI runs on a pull request")
     gates.add_argument(
@@ -58,6 +67,7 @@ def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(prog="doctrine")
     commands = root.add_subparsers(dest="command", required=True)
     work_parsers(commands)
+    eval_parsers(commands)
     ci_parsers(commands)
     return root
 
@@ -80,6 +90,7 @@ def dispatch(arguments: argparse.Namespace, cwd: Path) -> int:
         ("item", "resume"): lambda args: item_commands.item_resume(cwd, args.id),
         ("item", "done"): lambda _: item_commands.item_done(cwd),
         ("metric", "record"): lambda _: item_commands.metric_record(cwd),
+        ("eval", "run"): lambda args: eval_command.eval_run(cwd, args.task),
         ("ci", "goalposts"): lambda args: ci_commands.goalposts_command(cwd, args.base),
         ("ci", "scope"): lambda args: ci_commands.scope_command(cwd, args.base),
         ("ci", "red-first"): lambda args: ci_commands.red_first_command(cwd, args.base),
