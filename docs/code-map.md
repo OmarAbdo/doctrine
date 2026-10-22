@@ -42,7 +42,6 @@ Doctrine is a hexagonal Python service and follows its own rules. `src/doctrine/
 | Path | What |
 |---|---|
 | `rules/rules.toml` | The rule table |
-| `profiles/python/` | The Python profile's files |
 | `requirements/tools.in`, `tools.txt` | Pinned tools, with every file's sha256 |
 | `samples/` | Bad code and bypass attempts the self-test must catch |
 | `templates/python-hexagonal/` | What `doctrine init` copies into a new project |
