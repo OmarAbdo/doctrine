@@ -1,0 +1,4 @@
+id = "46"
+title = "doctrine deps lock pins a project's dependencies with every file's hash"
+kind = "feature"
+scope = ["src/doctrine/domain/dependencies/**", "src/doctrine/application/dependencies.py", "src/doctrine/adapters/tools/pip_resolver.py", "src/doctrine/adapters/tools/package_index.py", "src/doctrine/adapters/cli/commands/deps_command.py", "src/doctrine/adapters/cli/main.py", "tests/unit/domain/dependencies/**", "tests/unit/application/test_dependencies.py", "tests/integration/test_deps_lock.py"]
