@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from doctrine.adapters.cli import main
+from doctrine.adapters.cli import description_gate
 
 
 def test_the_description_gate_reads_the_pull_request_from_github(
@@ -15,6 +15,6 @@ def test_the_description_gate_reads_the_pull_request_from_github(
     body = "## What changed\nx\n## Why\ny\n## Proof\nz\n## Not verified\nnothing\n"
     event.write_text(json.dumps({"pull_request": {"number": 7, "body": body}}))
     monkeypatch.setenv("GITHUB_EVENT_PATH", str(event))
-    assert main.description_command() == 0
+    assert description_gate.description_command() == 0
     event.write_text(json.dumps({"pull_request": {"number": 7, "body": None}}))
-    assert main.description_command() == 1
+    assert description_gate.description_command() == 1

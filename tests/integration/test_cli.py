@@ -3,9 +3,9 @@ from pathlib import Path
 import pytest
 from support.projects import git, write
 
-from doctrine.adapters.cli import check_commands, item_commands
+from doctrine.adapters.cli.commands import check_commands, item_commands
 from doctrine.adapters.cli.console import NoProjectError, load_project
-from doctrine.adapters.cli.init_command import init_command
+from doctrine.adapters.cli.commands.init_command import init_command
 from doctrine.adapters.cli.main import main
 from doctrine.adapters.storage.metric_log import latest_metric
 from doctrine.adapters.storage.state_store import StateStore

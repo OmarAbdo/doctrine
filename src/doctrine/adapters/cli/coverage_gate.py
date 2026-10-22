@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from doctrine.adapters.cli.check_commands import runner_for
+from doctrine.adapters.cli.commands.check_commands import runner_for
 from doctrine.adapters.cli.console import complain, load_project, say, shorten
 
 REPORT_FILE = "coverage.xml"
