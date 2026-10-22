@@ -1,0 +1,4 @@
+id = "35"
+title = "doctrine eval label opens the labelling page for a judge"
+kind = "feature"
+scope = ["src/doctrine/adapters/cli/commands/eval_command.py", "src/doctrine/adapters/cli/commands/label_command.py", "src/doctrine/adapters/cli/main.py", "tests/integration/test_eval_label_command.py"]

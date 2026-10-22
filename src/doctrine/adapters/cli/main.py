@@ -12,6 +12,7 @@ from doctrine.adapters.cli.commands import (
     check_commands,
     eval_command,
     init_command,
+    label_command,
     item_commands,
     selftest_command,
 )
@@ -57,6 +58,9 @@ def eval_parsers(commands: argparse._SubParsersAction[argparse.ArgumentParser]) 
     )
     run = evals.add_parser("run", help="run an AI task on its eval set and record its score")
     run.add_argument("task")
+    label = evals.add_parser("label", help="label traces pass or fail for a judge, in the browser")
+    label.add_argument("task")
+    label.add_argument("--traces", type=Path, required=True)
 
 
 def ci_parsers(commands: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
@@ -98,6 +102,7 @@ def dispatch(arguments: argparse.Namespace, cwd: Path) -> int:
         ("item", "done"): lambda _: item_commands.item_done(cwd),
         ("metric", "record"): lambda _: item_commands.metric_record(cwd),
         ("eval", "run"): lambda args: eval_command.eval_run(cwd, args.task),
+        ("eval", "label"): lambda args: label_command.eval_label(cwd, args.task, args.traces),
         ("ci", "goalposts"): lambda args: ci_commands.goalposts_command(cwd, args.base),
         ("ci", "scope"): lambda args: ci_commands.scope_command(cwd, args.base),
         ("ci", "red-first"): lambda args: ci_commands.red_first_command(cwd, args.base),

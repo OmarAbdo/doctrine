@@ -4,18 +4,25 @@ from pathlib import Path
 
 from doctrine.adapters.cli.console import complain, load_project, say
 from doctrine.adapters.storage.eval_files import EvalFiles
+from doctrine.adapters.storage.project_files import Project
 from doctrine.adapters.storage.state_store import now
 from doctrine.adapters.tools.task_command import TaskCommand
 from doctrine.application.evals import record_eval_run
+from doctrine.domain.evals.task import AiTask
+
+
+def find_task(project: Project, name: str) -> AiTask | None:
+    tasks = {task.name: task for task in project.contract.ai_tasks}
+    if name not in tasks:
+        known = ", ".join(sorted(tasks)) or "none"
+        complain(f"There is no AI task {name}; the contract has: {known}.")
+    return tasks.get(name)
 
 
 def eval_run(cwd: Path, name: str) -> int:
     project = load_project(cwd)
-    tasks = {task.name: task for task in project.contract.ai_tasks}
-    task = tasks.get(name)
+    task = find_task(project, name)
     if task is None:
-        known = ", ".join(sorted(tasks)) or "none"
-        complain(f"There is no AI task {name}; the contract has: {known}.")
         return 1
     command = TaskCommand(project.root, task.command)
     result = record_eval_run(EvalFiles(project.root, task), command, now(), judge=task.judge)
