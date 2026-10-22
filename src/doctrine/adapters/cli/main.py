@@ -3,23 +3,19 @@
 from __future__ import annotations
 
 import argparse
-import json
-import os
 import sys
 from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from doctrine.adapters.claude.hooks import HANDLERS, run_hook
-from doctrine.adapters.cli import (
+from doctrine.adapters.cli.commands import (
     check_commands,
-    ci_commands,
-    coverage_gate,
     init_command,
     item_commands,
     selftest_command,
 )
-from doctrine.adapters.cli.console import NoProjectError, complain, say
-from doctrine.domain.governance.description import REQUIRED, description_problems
+from doctrine.adapters.cli import ci_commands, coverage_gate, description_gate
+from doctrine.adapters.cli.console import NoProjectError, complain
 from doctrine.domain.governance.work_item import KINDS
 
 Handler = Callable[[argparse.Namespace], int]
@@ -58,21 +54,6 @@ def ci_parsers(commands: argparse._SubParsersAction[argparse.ArgumentParser]) ->
     hook.add_argument("event", choices=sorted(HANDLERS))
 
 
-def description_command() -> int:
-    """`doctrine ci description`: the pull request says what changed, why, the proof and what is
-    not verified. (Here until adapters/cli is regrouped by responsibility.)"""
-    event_path = Path(os.environ.get("GITHUB_EVENT_PATH") or "missing-event.json")
-    event = json.loads(event_path.read_text(encoding="utf-8")) if event_path.exists() else {}
-    problems = description_problems(str((event.get("pull_request") or {}).get("body") or ""))
-    for problem in problems:
-        complain(f"Pull request description: {problem}.")
-    if problems:
-        complain(f"It needs these sections: {', '.join(f'## {name}' for name in REQUIRED)}.")
-        return 1
-    say("The description says what changed, why, the proof and what is not verified.")
-    return 0
-
-
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(prog="doctrine")
     commands = root.add_subparsers(dest="command", required=True)
@@ -103,7 +84,7 @@ def dispatch(arguments: argparse.Namespace, cwd: Path) -> int:
         ("ci", "scope"): lambda args: ci_commands.scope_command(cwd, args.base),
         ("ci", "red-first"): lambda args: ci_commands.red_first_command(cwd, args.base),
         ("ci", "coverage"): lambda args: coverage_gate.coverage_command(cwd, args.base),
-        ("ci", "description"): lambda _: description_command(),
+        ("ci", "description"): lambda _: description_gate.description_command(),
     }
     action = str(getattr(arguments, "action", None) or getattr(arguments, "gate", ""))
     return actions[(str(arguments.command), action)](arguments)

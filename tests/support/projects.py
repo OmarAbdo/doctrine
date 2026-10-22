@@ -3,7 +3,7 @@
 import subprocess
 from pathlib import Path
 
-from doctrine.adapters.cli.init_command import init_command
+from doctrine.adapters.cli.commands.init_command import init_command
 
 GIT_TIMEOUT_SECONDS = 60
 

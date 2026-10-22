@@ -1,0 +1,4 @@
+id = "21"
+title = "The command line grouped by responsibility: commands and gates"
+kind = "refactor"
+scope = ["src/doctrine/adapters/cli/**", "src/doctrine/__main__.py"]
