@@ -14,7 +14,7 @@ from doctrine.adapters.cli.commands import (
     item_commands,
     selftest_command,
 )
-from doctrine.adapters.cli import ci_commands, coverage_gate, description_gate
+from doctrine.adapters.cli.gates import ci_commands, coverage_gate, description_gate
 from doctrine.adapters.cli.console import NoProjectError, complain
 from doctrine.domain.governance.work_item import KINDS
 

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from doctrine.adapters.cli import description_gate
+from doctrine.adapters.cli.gates import description_gate
 
 
 def test_the_description_gate_reads_the_pull_request_from_github(
