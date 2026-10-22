@@ -1,0 +1,4 @@
+id = "34"
+title = "CI refuses changed code whose tests let too many mutants survive"
+kind = "feature"
+scope = ["src/doctrine/adapters/cli/gates/mutation_gate.py", "src/doctrine/adapters/cli/main.py", ".github/workflows/self.yml", ".github/workflows/project-gates.yml", "tests/integration/test_mutation_gate.py"]
