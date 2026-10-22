@@ -1,0 +1,4 @@
+id = "47"
+title = "One script puts a new project on GitHub, and the template drops the stale token"
+kind = "feature"
+scope = ["policy/new-project-github.ps1", "templates/python-hexagonal/.github/workflows/doctrine.yml", "docs/new-project.md", "docs/machine.md", "tests/integration/test_new_project_github.py"]

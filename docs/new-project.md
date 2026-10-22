@@ -24,20 +24,28 @@ This copies `templates/python-hexagonal`:
 It also runs `git init -b main` and installs the `pre-commit` hook. The package name comes from
 the project name (`job_hunter`).
 
-## 2. GitHub (Omar)
+## 2. GitHub (Omar, one command)
 
-1. **Create the repository** under `OmarAbdo`. It must be public to protect main on GitHub Free
-   (docs/decisions.md D5).
-2. **Add `OmarAbdosBot`** as a collaborator with write access, and accept the invitation as the
-   bot.
-3. **Protect `main`:**
-   - require a pull request with 1 approval, and dismiss stale approvals;
-   - require the status check `gates / gates`. That's the name GitHub gives the reusable
-     workflow's job; confirm it on the first pull request's checks;
-   - include administrators;
-   - require linear history;
-   - no force pushes.
-4. **Allow squash merging.**
+In the project's folder, with `gh` logged in as `OmarAbdo`:
+
+```
+powershell -ExecutionPolicy Bypass -File "D:\1 Software\Small tools\Doctrine\policy\new-project-github.ps1" -Name hunter
+```
+
+[policy/new-project-github.ps1](../policy/new-project-github.ps1) does every step, and running it
+again changes nothing:
+
+- commits the template if nothing is committed yet;
+- creates the repository as public (needed to protect main on GitHub Free; docs/decisions.md D5)
+  and pushes main;
+- allows squash merges only;
+- adds `OmarAbdosBot` as a writer and accepts the invitation with the bot's token from the admin
+  settings;
+- protects main: a pull request with 1 approval (stale approvals dismissed), the check
+  `gates / gates`, administrators included, linear history, no force pushes.
+
+It is Omar's to run because Claude's `gh` calls on repository settings are refused on purpose. No
+secret is needed: doctrine is public, so CI reads it with the project's own token.
 
 ## 3. The first item: the outcome metric (Omar and Claude)
 
