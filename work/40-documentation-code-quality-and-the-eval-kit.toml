@@ -1,0 +1,4 @@
+id = "40"
+title = "Documentation: code quality and the eval kit"
+kind = "chore"
+scope = ["docs/code-quality.md", "docs/evals.md"]
