@@ -1,0 +1,4 @@
+id = "15"
+title = "An approval re-runs the pull request's check instead of adding a second one"
+kind = "fix"
+scope = [".github/workflows/**", "templates/python-hexagonal/.github/workflows/**"]
