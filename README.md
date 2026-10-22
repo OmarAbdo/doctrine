@@ -71,4 +71,4 @@ in place. Run the installer again only to change the bot token.
 
 ## Not built yet
 
-The TypeScript profile, mutation testing and the eval kit (traces, labels, judge alignment).
+The mutation and eval gates in CI, and the eval kit's labelling page and judge alignment.

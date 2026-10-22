@@ -1,0 +1,4 @@
+id = "26"
+title = "A new project's approval re-runs its failed check instead of starting a second one"
+kind = "feature"
+scope = ["templates/python-hexagonal/.github/**", "tests/integration/test_template_workflows.py", "README.md"]
