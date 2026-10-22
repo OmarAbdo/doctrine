@@ -1,0 +1,4 @@
+id = "7"
+title = "Stream redirections are not file writes"
+kind = "fix"
+scope = ["src/doctrine/domain/safety/command_policy.py"]
