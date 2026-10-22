@@ -43,7 +43,9 @@ def run_on_base(project: Project, git: GitRepository, base: str, tests: list[str
             "pytest", ["-q", "-p", "no:cacheprovider", *tests]
         )
         return (
-            0 if result.passed else (NO_TESTS_COLLECTED if "no tests ran" in result.output else 1)
+            0
+            if result.passed
+            else (NO_TESTS_COLLECTED if result.exit_code == NO_TESTS_COLLECTED else 1)
         )
     finally:
         git.git("worktree", "remove", "--force", str(folder / "tree"))
