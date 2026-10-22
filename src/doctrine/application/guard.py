@@ -89,9 +89,9 @@ def item_refusal(relative: str, situation: Situation) -> str | None:
 
 
 def decide_edit(path: str, situation: Situation) -> Decision:
-    if is_protected(path):
-        return refuse("doctrine's own files change only through an approved pull request.")
     relative = situation.relative(path)
+    if is_protected(path, relative):
+        return refuse("doctrine's own files change only through an approved pull request.")
     if relative is None:
         return ALLOW
     if relative.startswith(COMMAND_OWNED):

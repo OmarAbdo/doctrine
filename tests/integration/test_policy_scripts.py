@@ -101,3 +101,48 @@ def test_a_release_goes_live_only_when_its_selftest_caught_everything() -> None:
     assert powershell('Test-SelftestPassed -Output "50 of 50 caught`n1"') == "True"
     assert powershell('Test-SelftestPassed -Output "49 of 50 caught`n0.98"') == "False"
     assert powershell("Test-SelftestPassed -Output ''") == "False"
+
+
+def installed_home(folder: Path, commit: str) -> Path:
+    home = folder / "Doctrine"
+    home.mkdir()
+    (home / "installed.json").write_text(
+        json.dumps({"commit": commit, "python": "C:\\Python\\python.exe"}), encoding="utf-8"
+    )
+    return home
+
+
+def update(home: Path, head: str, download: str) -> str:
+    return powershell(
+        f"Update-Doctrine -HomeDir '{home}' -ClaudeDir '{home}' "
+        f"-MainCommit {{ '{head}' }} -Download {{ param($Commit) {download} }}"
+    )
+
+
+def test_an_update_check_that_finds_nothing_new_still_leaves_a_trace(tmp_path: Path) -> None:
+    """2026-10-22: a check that found nothing new wrote nothing, so 13 quiet hours looked like
+    a dead task."""
+    home = installed_home(tmp_path, "abc")
+    update(home, "abc", "throw 'nothing to download'")
+    last = json.loads((home / "last-check.json").read_text(encoding="utf-8-sig"))
+    assert last["main"] == "abc"
+    assert last["result"] == "up to date"
+
+
+def test_a_new_release_installs_itself_with_its_own_installer_code(tmp_path: Path) -> None:
+    """The updater used the previous release's installer, so an installer change (the Git Bash
+    launcher) took effect one update late."""
+    home = installed_home(tmp_path, "old")
+    source = tmp_path / "download" / "doctrine-new"
+    (source / "policy").mkdir(parents=True)
+    (source / "policy" / "doctrine-release.psm1").write_text(
+        "function Install-Release { param($Source, $Commit, $Python, $HomeDir, $ClaudeDir)\n"
+        "  Set-Content (Join-Path $HomeDir 'installed-by.txt') \"new installer for $Commit\" }\n"
+        "Export-ModuleMember -Function *\n",
+        encoding="utf-8",
+    )
+    update(home, "new", f"return '{source}'")
+    assert (home / "installed-by.txt").read_text(encoding="utf-8-sig").strip() == (
+        "new installer for new"
+    )
+    assert "installed new (was old)" in (home / "update.log").read_text(encoding="utf-8-sig")

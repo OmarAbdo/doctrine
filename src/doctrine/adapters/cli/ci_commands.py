@@ -74,6 +74,22 @@ def branch_item(project: Project, git: GitRepository) -> WorkItem | None:
     return project.work_item(branch.removeprefix("item/").split("-", 1)[0])
 
 
+def size_problems(item: WorkItem, files: int, lines: int, project: Project) -> list[str]:
+    """A pull request stays small enough to review: changed lines and files within budget."""
+    rules, problems = project.rules, []
+    if lines > rules.limit("item_lines"):
+        problems.append(
+            f"Item {item.id} changes {lines} lines; the budget is "
+            f"{rules.limit('item_lines')}: split it."
+        )
+    if files > rules.limit("item_files"):
+        problems.append(
+            f"Item {item.id} changes {files} files; the budget is "
+            f"{rules.limit('item_files')}: split it."
+        )
+    return problems
+
+
 def scope_command(cwd: Path, base: str) -> int:
     project = load_project(cwd)
     git = GitRepository(project.root)
@@ -81,14 +97,13 @@ def scope_command(cwd: Path, base: str) -> int:
     if item is None:
         complain("This branch is not a work item (item/<id>-<title>) with a file in work/.")
         return 1
-    outside = item.out_of_scope(git.changed_files(base))
-    added, budget = git.added_lines(base), project.rules.limit("item_lines")
-    for path in outside:
-        complain(f"{path} is outside item {item.id}'s scope")
-    if added > budget:
-        complain(f"Item {item.id} adds {added} lines net; the budget is {budget}: split it.")
-    say(f"Item {item.id} ({item.kind}): {len(outside)} out of scope, {added}/{budget} lines.")
-    return 1 if outside or added > budget else 0
+    files = git.changed_files(base)
+    problems = [f"{path} is outside item {item.id}'s scope" for path in item.out_of_scope(files)]
+    problems += size_problems(item, len(files), git.changed_lines(base), project)
+    for problem in problems:
+        complain(problem)
+    say(f"Item {item.id} ({item.kind}): {len(files)} files, {git.changed_lines(base)} lines.")
+    return 1 if problems else 0
 
 
 def red_first_command(cwd: Path, base: str) -> int:

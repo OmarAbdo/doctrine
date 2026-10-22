@@ -37,6 +37,8 @@ def work_parsers(commands: argparse._SubParsersAction[argparse.ArgumentParser]) 
     start.add_argument("--title", required=True)
     start.add_argument("--scope", nargs="+", required=True)
     item.add_parser("show")
+    resume = item.add_parser("resume", help="go on with a finished item after review feedback")
+    resume.add_argument("id")
     item.add_parser("done")
     metric = commands.add_parser("metric").add_subparsers(dest="action", required=True)
     metric.add_parser("record")
@@ -94,6 +96,7 @@ def dispatch(arguments: argparse.Namespace, cwd: Path) -> int:
             cwd, args.kind, args.title, args.scope
         ),
         ("item", "show"): lambda _: item_commands.item_show(cwd),
+        ("item", "resume"): lambda args: item_commands.item_resume(cwd, args.id),
         ("item", "done"): lambda _: item_commands.item_done(cwd),
         ("metric", "record"): lambda _: item_commands.metric_record(cwd),
         ("ci", "goalposts"): lambda args: ci_commands.goalposts_command(cwd, args.base),

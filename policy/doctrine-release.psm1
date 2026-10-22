@@ -151,4 +151,32 @@ function Remove-OldReleases([string]$HomeDir, [string]$Current) {
     }
 }
 
+function Write-LastCheck([string]$HomeDir, [string]$Main, [string]$Result) {
+    # One small file overwritten on every check, so a quiet day still shows the task is alive.
+    $check = [ordered]@{ at = (Get-Date).ToUniversalTime().ToString("s") + "Z"; main = $Main; result = $Result }
+    Write-Atomically (Join-Path $HomeDir "last-check.json") ($check | ConvertTo-Json)
+}
+
+function Update-Doctrine {
+    # One check: install main's commit when it is new. The new release installs itself with its
+    # own installer code (approved with it on main), so an installer change counts at once.
+    param([string]$HomeDir, [string]$ClaudeDir, [scriptblock]$MainCommit, [scriptblock]$Download)
+    $installed = Get-Content -Raw (Join-Path $HomeDir "installed.json") | ConvertFrom-Json
+    $head = & $MainCommit
+    if ($head -eq $installed.commit) {
+        Write-LastCheck $HomeDir $head "up to date"
+        return
+    }
+    $source = & $Download $head
+    try {
+        Import-Module (Join-Path $source "policy\doctrine-release.psm1") -Force -Prefix New
+        Install-NewRelease -Source $source -Commit $head -Python $installed.python -HomeDir $HomeDir -ClaudeDir $ClaudeDir
+    } finally {
+        Remove-Item -Recurse -Force (Split-Path -Parent $source) -ErrorAction SilentlyContinue
+    }
+    $line = "{0}Z installed {1} (was {2})" -f (Get-Date).ToUniversalTime().ToString("s"), $head, $installed.commit
+    Add-Content -Path (Join-Path $HomeDir "update.log") -Value $line
+    Write-LastCheck $HomeDir $head "installed"
+}
+
 Export-ModuleMember -Function * -Variable BotLogin, BotEmail

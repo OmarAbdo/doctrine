@@ -46,12 +46,13 @@ class GitRepository:
             line for line in self.git("diff", "--name-only", f"{base}...HEAD").splitlines() if line
         ]
 
-    def added_lines(self, base: str) -> int:
+    def changed_lines(self, base: str) -> int:
+        """Added plus removed lines: what a reviewer reads, not the net."""
         total = 0
         for line in self.git("diff", "--numstat", f"{base}...HEAD").splitlines():
             added, removed, _path = line.split("\t", 2)
             if added.isdigit() and removed.isdigit():
-                total += int(added) - int(removed)
+                total += int(added) + int(removed)
         return total
 
     def file_at(self, revision: str, path: str) -> str | None:

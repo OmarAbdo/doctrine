@@ -1,0 +1,4 @@
+id = "18"
+title = "Resume an item after review feedback"
+kind = "feature"
+scope = ["src/doctrine/adapters/cli/item_commands.py", "src/doctrine/adapters/cli/main.py"]

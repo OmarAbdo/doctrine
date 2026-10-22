@@ -146,6 +146,25 @@ def test_the_gates_refuse_a_branch_that_is_no_item_and_an_item_over_budget(proje
     assert ci_commands.scope_command(project, "main") == 1
 
 
+def test_a_rewrite_counts_every_changed_line_not_the_net(project: Path) -> None:
+    """Replacing 300 lines with 300 others adds 0 lines net but changes 600 for a reviewer."""
+    lines = "".join(f"OLD_{number} = {number}\n" for number in range(300))
+    write(project, "src/sample_jobs/domain/table.py", lines)
+    commit_all(project, "A table")
+    item_branch(project)
+    write(project, "src/sample_jobs/domain/table.py", lines.replace("OLD_", "NEW_"))
+    commit_all(project, "The table rewritten")
+    assert ci_commands.scope_command(project, "main") == 1
+
+
+def test_an_item_touching_too_many_files_is_split(project: Path) -> None:
+    item_branch(project)
+    for number in range(16):
+        write(project, f"src/sample_jobs/domain/part_{number}.py", f"PART = {number}\n")
+    commit_all(project, "Sixteen files")
+    assert ci_commands.scope_command(project, "main") == 1
+
+
 def test_a_chore_needs_no_failing_test(project: Path) -> None:
     git(project, "switch", "-q", "-c", "item/2-tidy-readme")
     write(
@@ -155,15 +174,14 @@ def test_a_chore_needs_no_failing_test(project: Path) -> None:
     )
     commit_all(project, "Chore")
     assert ci_commands.red_first_command(project, "main") == 0
-
-
-def test_the_description_gate_reads_the_pull_request_from_github(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    event = tmp_path / "event.json"
-    body = "## What changed\nx\n## Why\ny\n## Proof\nz\n## Not verified\nnothing\n"
-    event.write_text(json.dumps({"pull_request": {"number": 7, "body": body}}))
-    monkeypatch.setenv("GITHUB_EVENT_PATH", str(event))
-    assert main.description_command() == 0
-    event.write_text(json.dumps({"pull_request": {"number": 7, "body": None}}))
-    assert main.description_command() == 1
+    
+ def test_the_description_gate_reads_the_pull_request_from_github(
+     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+ ) -> None:
+     event = tmp_path / "event.json"
+     body = "## What changed\nx\n## Why\ny\n## Proof\nz\n## Not verified\nnothing\n"
+     event.write_text(json.dumps({"pull_request": {"number": 7, "body": body}}))
+     monkeypatch.setenv("GITHUB_EVENT_PATH", str(event))
+     assert main.description_command() == 0
+     event.write_text(json.dumps({"pull_request": {"number": 7, "body": None}}))
+     assert main.description_command() == 1

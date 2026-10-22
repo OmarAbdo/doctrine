@@ -1,0 +1,4 @@
+id = "19"
+title = "Small pull requests: every changed line counts and files are capped"
+kind = "feature"
+scope = ["rules/rules.toml", "src/doctrine/adapters/tools/git_repository.py", "src/doctrine/adapters/cli/ci_commands.py"]

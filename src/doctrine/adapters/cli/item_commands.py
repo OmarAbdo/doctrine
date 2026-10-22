@@ -54,6 +54,34 @@ def item_start(cwd: Path, kind: str, title: str, scope: list[str]) -> int:
     return 0
 
 
+def item_branch(git: GitRepository, item_id: str) -> str | None:
+    """The item's branch, local or on the remote, as `git switch` takes it."""
+    for name in git.git("branch", "--all", "--format=%(refname:short)").splitlines():
+        local = name.removeprefix("origin/")
+        if local.startswith(f"item/{item_id}-"):
+            return local
+    return None
+
+
+def item_resume(cwd: Path, item_id: str) -> int:
+    """Review feedback on a finished item: the same item goes on, on its own branch."""
+    project = load_project(cwd)
+    state = StateStore(project.root)
+    if state.active_item():
+        complain(f"Item {state.active_item()} is active: finish it with `doctrine item done`.")
+        return 1
+    git = GitRepository(project.root)
+    branch = item_branch(git, item_id)
+    if branch is None:
+        complain(f"Item {item_id} has no branch here or on the remote.")
+        return 1
+    git.git("switch", branch)
+    state.update(item=item_id, unchecked=False, stop_blocks=0)
+    EvidenceLog(project.root).record("item", "resumed")
+    say(f"Item {item_id} resumed on {branch}. Finish it again with `doctrine item done`.")
+    return 0
+
+
 def item_show(cwd: Path) -> int:
     project = load_project(cwd)
     item_id = StateStore(project.root).active_item()

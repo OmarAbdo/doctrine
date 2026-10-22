@@ -1,0 +1,4 @@
+id = "16"
+title = "Each release installs itself, and every update check leaves a trace"
+kind = "fix"
+scope = ["policy/**"]

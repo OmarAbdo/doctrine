@@ -66,7 +66,7 @@ def test_git_reports_the_branch_the_changes_and_old_versions(project: Path) -> N
     commit_all(project, "Add search")
     assert repository.current_branch() == "item/1-search"
     assert repository.changed_files("main") == ["src/sample_jobs/domain/search.py"]
-    assert repository.added_lines("main") == 2
+    assert repository.changed_lines("main") == 2
     assert repository.file_at("main", "src/sample_jobs/domain/search.py") is None
     assert "LIMIT" in (repository.file_at("HEAD", "src/sample_jobs/domain/search.py") or "")
 
