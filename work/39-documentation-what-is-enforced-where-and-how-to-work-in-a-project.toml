@@ -1,0 +1,4 @@
+id = "39"
+title = "Documentation: what is enforced where, and how to work in a project"
+kind = "chore"
+scope = ["docs/enforcement.md", "docs/working-in-a-project.md"]
