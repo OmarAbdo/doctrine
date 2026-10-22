@@ -48,7 +48,9 @@ number the project exists to move:
 - a baseline;
 - `stop_below`, the value under which the line stops.
 
-Record it with `doctrine metric record`. Everything after that is judged against it.
+Record it with `doctrine metric record`, even while it is 0. The line arms once a recorded value
+reaches the stop value, so recording 0 before launch doesn't stop it (#46). Everything after
+launch is judged against it.
 
 ## 4. AI tasks
 

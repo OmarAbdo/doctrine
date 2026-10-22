@@ -1,0 +1,4 @@
+id = "45"
+title = "The line can't stop before the project has launched"
+kind = "fix"
+scope = ["src/doctrine/domain/governance/contract.py", "src/doctrine/application/brief.py", "src/doctrine/adapters/claude/situation.py", "src/doctrine/adapters/storage/metric_log.py", "src/doctrine/adapters/cli/commands/item_commands.py", "tests/unit/domain/governance/test_prelaunch.py", "tests/unit/domain/governance/test_contract.py", "tests/unit/application/test_prelaunch_brief.py", "docs/working-in-a-project.md", "docs/new-project.md", "docs/decisions.md"]

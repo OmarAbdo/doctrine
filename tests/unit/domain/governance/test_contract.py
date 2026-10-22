@@ -60,8 +60,8 @@ def test_stop_below_defaults_to_eighty_percent_of_the_baseline() -> None:
 
 def test_the_line_stops_when_the_metric_falls_under_its_stop_value() -> None:
     outcome = parse_contract(VALID).outcome
-    assert outcome.line_stopped(7.9) is True
-    assert outcome.line_stopped(8.0) is False
+    assert outcome.line_stopped([9.0, 7.9]) is True
+    assert outcome.line_stopped([9.0, 8.0]) is False
 
 
 def test_ai_tasks_name_their_prompt_command_eval_set_and_minimum() -> None:

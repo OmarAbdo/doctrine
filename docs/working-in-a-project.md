@@ -70,9 +70,12 @@ their own: first the domain, then the adapter, then the command.
   computes it from real data and prints one number, the baseline, and `stop_below`.
 - **How:** `doctrine metric record` runs the command and appends the value to
   `metrics/outcome.jsonl`.
-- **When the value falls under `stop_below`:** the line is stopped, and only `restore` items may
-  change code until a recorded value recovers. The session brief says so at the start of every
-  session.
+- **The stop value** is `baseline × stop_below`. When the latest value falls under it, the line is
+  stopped, and only `restore` items may change code until a recorded value recovers. The session
+  brief says so at the start of every session.
+- **Before launch** the line can't stop. A project that hasn't shipped honestly measures 0, so
+  the line arms only once a recorded value has reached the stop value. Record from the first item
+  anyway: the history shows when the project launched.
 - **First item of a new project:** agree the metric with Omar and define it.
 
 ## AI tasks

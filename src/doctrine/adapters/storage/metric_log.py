@@ -6,12 +6,18 @@ from pathlib import Path
 METRIC_FILE = Path("metrics") / "outcome.jsonl"
 
 
-def latest_metric(root: Path) -> float | None:
+def metric_values(root: Path) -> list[float]:
+    """Every recorded value, oldest first."""
     path = root / METRIC_FILE
     if not path.exists():
-        return None
+        return []
     lines = [line for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
-    return float(json.loads(lines[-1])["value"]) if lines else None
+    return [float(json.loads(line)["value"]) for line in lines]
+
+
+def latest_metric(root: Path) -> float | None:
+    values = metric_values(root)
+    return values[-1] if values else None
 
 
 def append_metric(root: Path, value: float, recorded_at: str) -> None:
