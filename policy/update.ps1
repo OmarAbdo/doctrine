@@ -28,17 +28,9 @@ function Get-Source([string]$Commit) {
 }
 
 try {
-    $installed = Get-Content -Raw (Join-Path $HomeDir "installed.json") | ConvertFrom-Json
-    $head = Get-MainCommit
-    if ($head -eq $installed.commit) { exit 0 }
-    $source = Get-Source $head
-    try {
-        Install-Release -Source $source -Commit $head -Python $installed.python -HomeDir $HomeDir -ClaudeDir $ClaudeDir
-    } finally {
-        Remove-Item -Recurse -Force (Split-Path -Parent $source) -ErrorAction SilentlyContinue
-    }
-    Write-Log "installed $head (was $($installed.commit))"
+    Update-Doctrine -HomeDir $HomeDir -ClaudeDir $ClaudeDir -MainCommit { Get-MainCommit } -Download { param($Commit) Get-Source $Commit }
 } catch {
     Write-Log "update failed, the current release stays: $_"
+    Write-LastCheck $HomeDir "" "failed: $_"
     exit 1
 }
