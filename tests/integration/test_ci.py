@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from support.projects import commit_all, git, write
 
-from doctrine.adapters.cli import ci_commands, github_reviews, red_first
+from doctrine.adapters.cli.gates import ci_commands, github_reviews, red_first
 from doctrine.adapters.storage.project_files import Project
 from doctrine.adapters.tools.git_repository import GitRepository
 

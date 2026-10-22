@@ -6,8 +6,8 @@ import tomllib
 from pathlib import Path
 
 from doctrine.adapters.cli.console import complain, load_project, say
-from doctrine.adapters.cli.github_reviews import owner_approved, pull_request_branch
-from doctrine.adapters.cli.red_first import tests_fail_on_base
+from doctrine.adapters.cli.gates.github_reviews import owner_approved, pull_request_branch
+from doctrine.adapters.cli.gates.red_first import tests_fail_on_base
 from doctrine.adapters.storage.project_files import CONTRACT_FILE, Project
 from doctrine.adapters.tools.git_repository import GitRepository
 from doctrine.domain.governance.contract import parse_contract

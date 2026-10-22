@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from support.projects import commit_all, git, write
 
-from doctrine.adapters.cli.coverage_gate import coverage_command
+from doctrine.adapters.cli.gates.coverage_gate import coverage_command
 from doctrine.adapters.cli.commands.selftest_command import selftest_command
 
 COVERED = "def double(number: int) -> int:\n    return number * 2\n"

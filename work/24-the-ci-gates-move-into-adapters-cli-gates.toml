@@ -1,0 +1,4 @@
+id = "24"
+title = "The CI gates move into adapters/cli/gates"
+kind = "refactor"
+scope = ["src/doctrine/adapters/cli/**", "tests/integration/**"]
