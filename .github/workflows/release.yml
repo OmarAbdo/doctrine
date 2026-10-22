@@ -1,8 +1,13 @@
 # New projects pin a doctrine release tag (docs/new-project.md). When main's pyproject.toml names a
 # version that has no tag yet, this tags main's commit as v<version>, so nobody has to remember.
+# It runs after merge.yml: GitHub starts no workflow for the push merge.yml makes with the
+# repository's own token, so `push` alone covers only merges made by a person.
 name: release
 
 on:
+  workflow_run:
+    workflows: [merge]
+    types: [completed]
   push:
     branches: [main]
 
@@ -11,11 +16,13 @@ permissions:
 
 jobs:
   tag:
+    if: github.event_name == 'push' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
       - name: Tag the version if it is new
         run: |
@@ -24,5 +31,5 @@ jobs:
             echo "v$version is already tagged."
             exit 0
           fi
-          git tag "v$version" "$GITHUB_SHA"
+          git tag "v$version" HEAD
           git push origin "v$version"
