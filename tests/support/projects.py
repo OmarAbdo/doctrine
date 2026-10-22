@@ -10,7 +10,7 @@ GIT_TIMEOUT_SECONDS = 60
 
 def git(root: Path, *arguments: str) -> str:
     finished = subprocess.run(
-        ["git", *arguments],
+        ["git", "-c", "core.fsmonitor=false", *arguments],
         cwd=root,
         capture_output=True,
         text=True,
