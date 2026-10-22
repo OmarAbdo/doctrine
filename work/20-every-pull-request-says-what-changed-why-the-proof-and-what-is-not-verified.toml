@@ -1,0 +1,4 @@
+id = "20"
+title = "Every pull request says what changed, why, the proof and what is not verified"
+kind = "feature"
+scope = ["src/doctrine/domain/governance/description.py", "src/doctrine/adapters/cli/description_gate.py", "src/doctrine/adapters/cli/main.py", ".github/**", "templates/python-hexagonal/.github/**"]

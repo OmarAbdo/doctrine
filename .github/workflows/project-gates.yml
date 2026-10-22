@@ -48,6 +48,8 @@ jobs:
         run: doctrine ci red-first --base origin/${{ github.event.pull_request.base.ref }}
       - name: Changed lines are tested
         run: doctrine ci coverage --base origin/${{ github.event.pull_request.base.ref }}
+      - name: The description says what changed, why, the proof and what is not verified
+        run: doctrine ci description --base origin/${{ github.event.pull_request.base.ref }}
       - name: Goalposts unchanged, or approved by the approver
         env:
           GH_TOKEN: ${{ github.token }}
