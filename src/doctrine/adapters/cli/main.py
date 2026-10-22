@@ -15,7 +15,7 @@ from doctrine.adapters.cli.commands import (
     item_commands,
     selftest_command,
 )
-from doctrine.adapters.cli.gates import ci_commands, coverage_gate, description_gate
+from doctrine.adapters.cli.gates import ci_commands, coverage_gate, description_gate, eval_gate
 from doctrine.adapters.cli.console import NoProjectError, complain
 from doctrine.domain.governance.work_item import KINDS
 
@@ -56,7 +56,7 @@ def eval_parsers(commands: argparse._SubParsersAction[argparse.ArgumentParser]) 
 def ci_parsers(commands: argparse._SubParsersAction[argparse.ArgumentParser]) -> None:
     gates = commands.add_parser("ci", help="checks CI runs on a pull request")
     gates.add_argument(
-        "gate", choices=["goalposts", "scope", "red-first", "coverage", "description"]
+        "gate", choices=["goalposts", "scope", "red-first", "coverage", "description", "evals"]
     )
     gates.add_argument("--base", required=True)
     hook = commands.add_parser("hook", help="Claude Code hook entry point (event JSON on stdin)")
@@ -96,6 +96,7 @@ def dispatch(arguments: argparse.Namespace, cwd: Path) -> int:
         ("ci", "red-first"): lambda args: ci_commands.red_first_command(cwd, args.base),
         ("ci", "coverage"): lambda args: coverage_gate.coverage_command(cwd, args.base),
         ("ci", "description"): lambda _: description_gate.description_command(),
+        ("ci", "evals"): lambda args: eval_gate.evals_command(cwd, args.base),
     }
     action = str(getattr(arguments, "action", None) or getattr(arguments, "gate", ""))
     return actions[(str(arguments.command), action)](arguments)

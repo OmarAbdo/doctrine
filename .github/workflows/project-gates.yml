@@ -50,6 +50,10 @@ jobs:
         run: doctrine ci coverage --base origin/${{ github.event.pull_request.base.ref }}
       - name: The description says what changed, why, the proof and what is not verified
         run: doctrine ci description --base origin/${{ github.event.pull_request.base.ref }}
+      - name: A changed prompt or eval set brings a recorded run that holds up
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: doctrine ci evals --base origin/${{ github.event.pull_request.base.ref }}
       - name: Goalposts unchanged, or approved by the approver
         env:
           GH_TOKEN: ${{ github.token }}
