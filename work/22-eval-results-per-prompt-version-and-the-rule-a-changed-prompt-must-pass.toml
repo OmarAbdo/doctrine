@@ -1,0 +1,4 @@
+id = "22"
+title = "Eval results per prompt version and the rule a changed prompt must pass"
+kind = "feature"
+scope = ["src/doctrine/domain/evals/**"]
