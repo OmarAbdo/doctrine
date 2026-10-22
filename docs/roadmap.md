@@ -27,7 +27,8 @@ account, the admin installation and self-update.
 - **Command patterns can't see everything.** A write to a protected file through a script that
   builds the path from pieces isn't caught by the command policy. The protections raise the cost of
   a shortcut; CI and Omar's review are the backstop.
-- **Releases are tagged by hand.** New projects pin a release tag (`vX.Y.Z`). After a change that
-  projects should get, bump the version and push a tag (see docs/new-project.md, "Releases").
+- **Releases need a version bump.** New projects pin a release tag (`vX.Y.Z`). `release.yml`
+  tags each new version on main by itself (#44), but someone has to bump the version after changes
+  projects should get (see docs/new-project.md, "Releases").
 - **Private repositories can't be protected on GitHub Free.** A private project gets the hooks and
   local checks, but no protected main.
