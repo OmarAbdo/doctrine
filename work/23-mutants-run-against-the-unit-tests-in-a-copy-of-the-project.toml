@@ -1,0 +1,4 @@
+id = "23"
+title = "Mutants run against the unit tests in a copy of the project"
+kind = "feature"
+scope = ["src/doctrine/adapters/tools/mutation_trial.py"]
