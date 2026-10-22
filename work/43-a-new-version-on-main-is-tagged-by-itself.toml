@@ -1,0 +1,4 @@
+id = "43"
+title = "A new version on main is tagged by itself"
+kind = "feature"
+scope = [".github/workflows/release.yml", "tests/integration/test_release_workflow.py"]
