@@ -1,0 +1,4 @@
+id = "37"
+title = "Documentation: the map, the history and what is left"
+kind = "chore"
+scope = ["CLAUDE.md", "README.md", "docs/history.md", "docs/roadmap.md"]
