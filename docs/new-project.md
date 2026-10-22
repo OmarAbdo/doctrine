@@ -71,5 +71,6 @@ New projects pin the version in `src/doctrine/__init__.py` and `pyproject.toml`,
 must exist as a tag:
 
 1. Bump the version in both files through an item, after the changes projects should get.
-2. Once it merges, push the tag from the merged main: `git tag v0.2.0 && git push origin v0.2.0`.
-   A tags-only push from main is allowed.
+2. When it merges, `.github/workflows/release.yml` tags main's commit `v<version>` by itself (#44).
+   By hand, if ever needed: `git tag v0.2.0 && git push origin v0.2.0` from the merged main (a
+   tags-only push from main is allowed).
