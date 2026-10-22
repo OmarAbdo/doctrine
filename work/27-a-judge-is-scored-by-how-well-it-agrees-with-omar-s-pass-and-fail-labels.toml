@@ -1,0 +1,4 @@
+id = "27"
+title = "A judge is scored by how well it agrees with Omar's pass and fail labels"
+kind = "feature"
+scope = ["src/doctrine/domain/evals/**", "src/doctrine/domain/governance/goalposts.py", "tests/unit/domain/evals/test_alignment.py", "tests/unit/domain/governance/test_judge_goalposts.py"]

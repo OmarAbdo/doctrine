@@ -12,6 +12,7 @@ class AiTask:
     prompt: str
     command: tuple[str, ...]
     minimum: float
+    judge: bool = False
 
     @property
     def cases(self) -> str:
@@ -32,6 +33,8 @@ def ai_task_problems(task: Mapping[str, Any]) -> list[str]:
     minimum = task.get("minimum", 0)
     if not isinstance(minimum, (int, float)) or not 0 <= minimum <= 1:
         problems.append(f"ai task {name}: minimum must be between 0 and 1")
+    if not isinstance(task.get("judge", False), bool):
+        problems.append(f"ai task {name}: judge must be true or false")
     return problems
 
 
@@ -41,4 +44,5 @@ def parse_ai_task(task: Mapping[str, Any]) -> AiTask:
         prompt=task["prompt"],
         command=tuple(task["command"]),
         minimum=float(task["minimum"]),
+        judge=task.get("judge", False),
     )
