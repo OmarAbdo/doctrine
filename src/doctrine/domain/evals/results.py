@@ -6,8 +6,9 @@ refused; lower than before on the same eval set it needs the approver; a grown e
 by the minimum only, since new cases are meant to be hard.
 """
 
+import hashlib
 from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Any
 
 from doctrine.domain.evals.task import AiTask
@@ -29,6 +30,15 @@ class Version:
 
     prompt: str
     cases: str
+
+
+def digest(text: str) -> str:
+    """A content digest that a Windows checkout (CRLF) and a Linux one (LF) agree on."""
+    return hashlib.sha256(text.replace("\r\n", "\n").encode("utf-8")).hexdigest()[:16]
+
+
+def result_line(result: EvalResult) -> dict[str, Any]:
+    return {**asdict(result), "failures": list(result.failures)}
 
 
 @dataclass(frozen=True)
