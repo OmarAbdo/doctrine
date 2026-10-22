@@ -1,5 +1,7 @@
 """Files that belong to doctrine itself and change only through an approved pull request."""
 
+import re
+
 MACHINE_PATHS = ("program files/doctrine", "program files/claudecode", ".claude/settings")
 PROJECT_PATHS = (
     ".doctrine/",
@@ -9,6 +11,8 @@ PROJECT_PATHS = (
     ".github/codeowners",
 )
 PROTECTED_PATHS = (*MACHINE_PATHS, *PROJECT_PATHS)
+# An AI task's recorded runs: the evals gate trusts them, so only `doctrine eval run` writes them.
+RECORDED_RUNS = re.compile(r"(?<![\w.-])evals/[^/\s'\"]+/results\.jsonl")
 
 
 def normalise(path: str) -> str:
@@ -17,7 +21,8 @@ def normalise(path: str) -> str:
 
 def mentions_protected(text: str) -> bool:
     lowered = normalise(text)
-    return any(fragment in lowered for fragment in PROTECTED_PATHS)
+    mentioned = any(fragment in lowered for fragment in PROTECTED_PATHS)
+    return mentioned or RECORDED_RUNS.search(lowered) is not None
 
 
 def is_protected(path: str, relative: str | None = None) -> bool:
@@ -27,4 +32,5 @@ def is_protected(path: str, relative: str | None = None) -> bool:
         return True
     if relative is None:
         return mentions_protected(path)
-    return normalise(relative).startswith(PROJECT_PATHS)
+    at_root = normalise(relative)
+    return at_root.startswith(PROJECT_PATHS) or RECORDED_RUNS.match(at_root) is not None
