@@ -1,0 +1,4 @@
+id = "28"
+title = "Changing an eval set no longer crashes the goalposts gate"
+kind = "fix"
+scope = ["src/doctrine/domain/governance/goalposts.py", "tests/unit/domain/governance/test_goalposts.py", "tests/unit/domain/governance/test_eval_set_goalposts.py", "tests/integration/test_ci.py"]

@@ -1,5 +1,5 @@
 from doctrine.domain.governance.contract import parse_contract
-from doctrine.domain.governance.goalposts import contract_changes, eval_label_changes
+from doctrine.domain.governance.goalposts import contract_changes
 from doctrine.domain.rules.table import parse_rule_table
 
 TABLE = parse_rule_table(
@@ -76,13 +76,6 @@ def test_a_service_changing_its_architecture_needs_approval() -> None:
     ]
 
 
-def test_new_eval_cases_are_free_but_changed_or_removed_labels_are_not() -> None:
-    before = [{"id": "a", "label": "good"}, {"id": "b", "label": "bad"}]
-    after = [{"id": "a", "label": "bad"}, {"id": "c", "label": "good"}]
-    assert eval_label_changes(before, after) == [
-        "eval case a: label good -> bad",
-        "eval case b removed",
-    ]
 
 
 def test_lowering_or_dropping_an_ai_task_needs_approval() -> None:
