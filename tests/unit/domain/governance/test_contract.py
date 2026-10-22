@@ -65,8 +65,12 @@ def test_the_line_stops_when_the_metric_falls_under_its_stop_value() -> None:
 
 
 def test_ai_tasks_name_their_prompt_command_eval_set_and_minimum() -> None:
-    task = {"name": "fit-score", "prompt": "prompts/fit-score.md",
-            "command": ["python", "-m", "jobs.adapters.fit_eval"], "minimum": 0.85}
+    task = {
+        "name": "fit-score",
+        "prompt": "prompts/fit-score.md",
+        "command": ["python", "-m", "jobs.adapters.fit_eval"],
+        "minimum": 0.85,
+    }
     contract = parse_contract(dict(VALID, ai_tasks=[task]))
     parsed = contract.ai_tasks[0]
     assert parsed.cases == "evals/fit-score/cases.jsonl"
