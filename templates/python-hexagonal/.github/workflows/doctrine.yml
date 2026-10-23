@@ -6,6 +6,10 @@ on:
 
 jobs:
   gates:
+    # A called workflow gets no more than this job grants; new repositories grant almost nothing.
+    permissions:
+      contents: read
+      pull-requests: read
     uses: {{doctrine_repository}}/.github/workflows/project-gates.yml@v{{version}}
     with:
       doctrine_ref: v{{version}}

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from doctrine.adapters.cli.commands.check_commands import runner_for
 from doctrine.adapters.cli.console import complain, load_project, say, shorten
+from doctrine.application.check import NO_TESTS_COLLECTED
 
 REPORT_FILE = "coverage.xml"
 
@@ -14,6 +15,10 @@ def coverage_command(cwd: Path, base: str) -> int:
     sources = ",".join(service.path for service in project.contract.services)
     tests = sorted({service.tests for service in project.contract.services})
     measured = runner.run("coverage", ["run", f"--source={sources}", "-m", "pytest", "-q", *tests])
+    if measured.exit_code == NO_TESTS_COLLECTED:
+        # A new project before its first test; the test_kinds rule demands one for every module.
+        say("No tests yet: the project has no code for this pull request's lines to cover.")
+        return 0
     if not measured.passed:
         complain(f"The tests failed under coverage:\n{shorten(measured.output)}")
         return 1
