@@ -18,11 +18,13 @@ doctrine item start --kind feature --title "Search by city" --scope "src/jobs/se
   - `restore` is the only kind allowed while the line is stopped.
 - **Scope:** the files and folders the item may change, as glob patterns. `tests/**` and `work/**`
   are always in scope. A pattern may not start with `*`: name a folder or a file.
-  When the item needs a file its scope misses, `doctrine item scope <patterns>` widens it; the
-  work file's diff shows the change in the pull request. Nothing else may write `work/`.
 - **What it does:** writes `work/<id>-<title>.toml`, creates and switches to
   `item/<id>-<title>`, and records the item as active in `.doctrine/state.json`. The id is unique
   across all local and remote branches.
+
+- **Widening it:** when the item needs a file its scope misses, `doctrine item scope <patterns>`
+  widens it, and the work file's diff shows the change in the pull request. Nothing else may
+  write `work/`.
 
 **2. Red first** (feature, fix, restore). Write the test, then run `doctrine test` (pass test
 paths to run only those). It must fail, and that red run is recorded as evidence. Until then,
