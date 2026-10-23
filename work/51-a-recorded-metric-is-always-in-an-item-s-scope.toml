@@ -1,0 +1,4 @@
+id = "51"
+title = "A recorded metric is always in an item's scope"
+kind = "fix"
+scope = ["src/doctrine/domain/governance/work_item.py", "tests/unit/domain/governance/test_metrics_in_scope.py", "docs/working-in-a-project.md", "docs/new-project.md"]
