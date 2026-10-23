@@ -8,7 +8,7 @@ from typing import Any
 
 KINDS = frozenset({"feature", "fix", "restore", "refactor", "chore"})
 RED_FIRST_KINDS = frozenset({"feature", "fix", "restore"})
-ALWAYS_IN_SCOPE = ("tests/**", "work/**")
+ALWAYS_IN_SCOPE = ("tests/**", "work/**", "metrics/**")
 
 
 @dataclass(frozen=True)

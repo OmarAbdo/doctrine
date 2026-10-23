@@ -16,8 +16,9 @@ doctrine item start --kind feature --title "Search by city" --scope "src/jobs/se
   - `refactor`: changes structure, not behaviour.
   - `chore`: tooling, docs.
   - `restore` is the only kind allowed while the line is stopped.
-- **Scope:** the files and folders the item may change, as glob patterns. `tests/**` and `work/**`
-  are always in scope. A pattern may not start with `*`: name a folder or a file.
+- **Scope:** the files and folders the item may change, as glob patterns. `tests/**`, `work/**`
+  and `metrics/**` are always in scope, so a recorded metric rides along in whichever item is
+  open (#59). A pattern may not start with `*`: name a folder or a file.
 - **What it does:** writes `work/<id>-<title>.toml`, creates and switches to
   `item/<id>-<title>`, and records the item as active in `.doctrine/state.json`. The id is unique
   across all local and remote branches.
