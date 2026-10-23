@@ -1,0 +1,4 @@
+id = "53"
+title = "New projects' gates start and pass before their first test"
+kind = "fix"
+scope = ["src/doctrine/adapters/cli/gates/coverage_gate.py", "templates/python-hexagonal/.github/workflows/doctrine.yml", "pyproject.toml", "src/doctrine/__init__.py", "tests/integration/test_new_project_gates.py"]
