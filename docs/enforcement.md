@@ -38,6 +38,7 @@ single gap lets a change through.
 | push-main (in a project) | Pushing to main or master | Push the item branch |
 | main-branch (in a project) | Committing on main; pushing from main (tags only are fine) | Start an item |
 | protected-path | A write (redirect, copy, move, delete, `Set-Content`...) that names a protected path; stream redirections like `2>&1` are not writes | Change it through an approved pull request |
+| command-owned (in a project) | A shell write to a work item (`work/<n>-*.toml`) or to `metrics/outcome.jsonl` | `doctrine item scope <patterns>` widens the active item; `doctrine metric record` records the outcome |
 
 ### Protected files (`domain/safety/protected.py`)
 
@@ -45,7 +46,7 @@ single gap lets a change through.
 - **At a project's root:** `.doctrine/` (state and evidence), `.git/hooks`,
   `.github/workflows/doctrine*`, `CODEOWNERS`, and `evals/<task>/results.jsonl` (recorded eval
   runs, written only by `doctrine eval run`).
-- **Written by commands only:** `work/` (`doctrine item`) and `metrics/`
+- **Written by commands only, by file tools and by the shell (#59):** `work/` (`doctrine item`) and `metrics/`
   (`doctrine metric record`).
 
 ## 2. The git hook

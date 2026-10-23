@@ -23,6 +23,10 @@ doctrine item start --kind feature --title "Search by city" --scope "src/jobs/se
   `item/<id>-<title>`, and records the item as active in `.doctrine/state.json`. The id is unique
   across all local and remote branches.
 
+- **Widening it:** when the item needs a file its scope misses, `doctrine item scope <patterns>`
+  widens it, and the work file's diff shows the change in the pull request. Nothing else may
+  write `work/`.
+
 **2. Red first** (feature, fix, restore). Write the test, then run `doctrine test` (pass test
 paths to run only those). It must fail, and that red run is recorded as evidence. Until then,
 edits to source code are refused. Put each item's tests in their own test file: two items
@@ -107,6 +111,7 @@ doctrine eval label <judge> --traces traces.jsonl # Omar labels real outputs for
 |---|---|
 | `doctrine init --name "..." --approver OmarAbdo` | A new project from the template, with its git hook |
 | `doctrine item start / show / done / resume <id>` | The item lifecycle |
+| `doctrine item scope <patterns>` | Widens the active item's scope |
 | `doctrine test [paths]` | Runs the tests and records the run (red or green) as evidence |
 | `doctrine check` | Every rule on every service |
 | `doctrine metric record` | Records the outcome metric |

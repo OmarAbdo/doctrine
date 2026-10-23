@@ -12,7 +12,7 @@ from doctrine.adapters.storage.state_store import StateStore, now
 from doctrine.adapters.tools.git_repository import GitRepository
 from doctrine.adapters.tools.project_environment import project_command
 from doctrine.domain.governance.evidence import item_not_ready
-from doctrine.domain.governance.work_item import WorkItem, parse_work_item
+from doctrine.domain.governance.work_item import WorkItem, parse_work_item, scope_problem
 
 METRIC_TIMEOUT_SECONDS = 600
 
@@ -23,6 +23,32 @@ def item_toml(item: WorkItem) -> str:
         f"id = {json.dumps(item.id)}\ntitle = {json.dumps(item.title)}\n"
         f"kind = {json.dumps(item.kind)}\nscope = [{scope}]\n"
     )
+
+
+def write_item(project: Project, item: WorkItem) -> None:
+    (project.root / "work").mkdir(exist_ok=True)
+    path = project.root / "work" / f"{item.id}-{item.slug}.toml"
+    path.write_text(item_toml(item), encoding="utf-8", newline="\n")
+
+
+def item_scope(cwd: Path, patterns: list[str]) -> int:
+    """The one way to widen the active item: the work file's diff shows it in the pull request."""
+    project = load_project(cwd)
+    item_id = StateStore(project.root).active_item()
+    item = project.work_item(item_id) if item_id else None
+    if item is None:
+        complain("No active item: start one with `doctrine item start`.")
+        return 1
+    problem = scope_problem(tuple(patterns))
+    if problem:
+        complain(f"{problem}.")
+        return 1
+    added = [pattern for pattern in patterns if pattern not in item.scope]
+    wider = WorkItem(id=item.id, title=item.title, kind=item.kind, scope=(*item.scope, *added))
+    write_item(project, wider)
+    EvidenceLog(project.root).record("item", "scope widened", detail=", ".join(added))
+    say(f"Item {item.id}'s scope: {list(wider.scope)}.")
+    return 0
 
 
 def next_item_id(project: Project) -> str:
@@ -42,10 +68,7 @@ def item_start(cwd: Path, kind: str, title: str, scope: list[str]) -> int:
     item = parse_work_item(
         {"id": next_item_id(project), "title": title, "kind": kind, "scope": scope}
     )
-    (project.root / "work").mkdir(exist_ok=True)
-    (project.root / "work" / f"{item.id}-{item.slug}.toml").write_text(
-        item_toml(item), encoding="utf-8"
-    )
+    write_item(project, item)
     GitRepository(project.root).create_branch(item.branch)
     state.update(item=item.id, unchecked=False, stop_blocks=0)
     EvidenceLog(project.root).record("item", "started", detail=f"{item.kind}: {item.title}")
