@@ -18,6 +18,8 @@ doctrine item start --kind feature --title "Search by city" --scope "src/jobs/se
   - `restore` is the only kind allowed while the line is stopped.
 - **Scope:** the files and folders the item may change, as glob patterns. `tests/**` and `work/**`
   are always in scope. A pattern may not start with `*`: name a folder or a file.
+  When the item needs a file its scope misses, `doctrine item scope <patterns>` widens it; the
+  work file's diff shows the change in the pull request. Nothing else may write `work/`.
 - **What it does:** writes `work/<id>-<title>.toml`, creates and switches to
   `item/<id>-<title>`, and records the item as active in `.doctrine/state.json`. The id is unique
   across all local and remote branches.
@@ -106,6 +108,7 @@ doctrine eval label <judge> --traces traces.jsonl # Omar labels real outputs for
 |---|---|
 | `doctrine init --name "..." --approver OmarAbdo` | A new project from the template, with its git hook |
 | `doctrine item start / show / done / resume <id>` | The item lifecycle |
+| `doctrine item scope <patterns>` | Widens the active item's scope |
 | `doctrine test [paths]` | Runs the tests and records the run (red or green) as evidence |
 | `doctrine check` | Every rule on every service |
 | `doctrine metric record` | Records the outcome metric |

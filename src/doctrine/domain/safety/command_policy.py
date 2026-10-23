@@ -7,11 +7,13 @@ names the rule and what to do instead, so the shortcut is never the easier path.
 import re
 from dataclasses import dataclass
 
-from doctrine.domain.safety.protected import mentions_protected
+from doctrine.domain.safety.protected import mentions_command_owned, mentions_protected
 
 MAIN_BRANCHES = frozenset({"main", "master"})
 STREAM_REDIRECTION = re.compile(r"\d*>&\d|\d*>\s*(\$null|/dev/null|nul)\b", re.IGNORECASE)
-SEGMENTS = re.compile(r"&&|\|\||[;|\n]")
+# A separator splits the line only outside quotes: what follows it holds balanced quotes. A `|`
+# inside a quoted sed expression once cut a write from its path (found by the self-test).
+SEGMENTS = re.compile(r"""(?:&&|\|\||[;|\n])(?=(?:[^'"]|'[^']*'|"[^"]*")*$)""")
 PUSH = re.compile(r"\bgit\s+push\b[^;&|]*")
 TAGS_ONLY = re.compile(r"git\s+push\s+\S+\s+(--tags|refs/tags/\S+(\s+refs/tags/\S+)*)")
 
@@ -88,6 +90,11 @@ class Verdict:
 
 
 ALLOWED = Verdict(allowed=True)
+COMMAND_OWNED_ADVICE = (
+    "Refused (command-owned): work items and the outcome's history are written by doctrine "
+    "commands only; widen the active item with `doctrine item scope <patterns>`, record the "
+    "outcome with `doctrine metric record`."
+)
 
 PROJECT_RULES = (
     (
@@ -98,10 +105,13 @@ PROJECT_RULES = (
 )
 
 
+def writes_files(command: str) -> bool:
+    """Redirecting a stream (2>&1, >&2, 2>$null) writes no file."""
+    return WRITES.search(STREAM_REDIRECTION.sub(" ", command)) is not None
+
+
 def touches_protected_path(command: str) -> bool:
-    """A write near a protected path. Redirecting a stream (2>&1, >&2, 2>$null) writes no file."""
-    writes = STREAM_REDIRECTION.sub(" ", command)
-    return mentions_protected(command) and WRITES.search(writes) is not None
+    return mentions_protected(command) and writes_files(command)
 
 
 def on_main(command: str, context: CommandContext) -> bool:
@@ -133,6 +143,8 @@ def judge_segment(command: str, context: CommandContext) -> Verdict:
             reason="Refused (protected-path): doctrine's own files change only through "
             "an approved pull request to the doctrine repository.",
         )
+    if context.in_project and mentions_command_owned(command) and writes_files(command):
+        return Verdict(allowed=False, rule="command-owned", reason=COMMAND_OWNED_ADVICE)
     if context.in_project and on_main(command, context):
         return Verdict(
             allowed=False,

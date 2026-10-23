@@ -72,3 +72,7 @@ command = "git push origin refs/tags/v9.9.9 main"
 path = "evals/fit/results.jsonl"
 [[shell]]
 command = "echo '{\"score\": 1.0}' >> evals/fit/results.jsonl"
+[[shell]]
+command = "echo '{\"value\": 99}' >> metrics/outcome.jsonl"
+[[shell]]
+command = "sed -i 's|domain|everything|' work/1-anything.toml"

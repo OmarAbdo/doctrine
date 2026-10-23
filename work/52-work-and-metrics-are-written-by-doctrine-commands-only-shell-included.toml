@@ -1,0 +1,4 @@
+id = "52"
+title = "work/ and metrics/ are written by doctrine commands only, shell included"
+kind = "feature"
+scope = ["src/doctrine/domain/safety/protected.py", "src/doctrine/domain/safety/command_policy.py", "src/doctrine/adapters/cli/commands/item_commands.py", "src/doctrine/adapters/cli/main.py", "samples/attacks.toml", "tests/unit/domain/safety/test_command_owned_files.py", "tests/integration/test_item_scope.py", "docs/enforcement.md", "docs/working-in-a-project.md"]

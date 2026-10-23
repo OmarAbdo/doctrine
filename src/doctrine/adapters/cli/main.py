@@ -42,6 +42,8 @@ def work_parsers(commands: argparse._SubParsersAction[argparse.ArgumentParser]) 
     start.add_argument("--title", required=True)
     start.add_argument("--scope", nargs="+", required=True)
     item.add_parser("show")
+    widen = item.add_parser("scope", help="widen the active item's scope")
+    widen.add_argument("patterns", nargs="+")
     resume = item.add_parser("resume", help="go on with a finished item after review feedback")
     resume.add_argument("id")
     item.add_parser("done")
@@ -103,6 +105,7 @@ def dispatch(arguments: argparse.Namespace, cwd: Path) -> int:
             cwd, args.kind, args.title, args.scope
         ),
         ("item", "show"): lambda _: item_commands.item_show(cwd),
+        ("item", "scope"): lambda args: item_commands.item_scope(cwd, args.patterns),
         ("item", "resume"): lambda args: item_commands.item_resume(cwd, args.id),
         ("item", "done"): lambda _: item_commands.item_done(cwd),
         ("metric", "record"): lambda _: item_commands.metric_record(cwd),
